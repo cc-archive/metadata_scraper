@@ -1,0 +1,3 @@
+[console_scripts]
+scrape_server = cc.deedscraper:serve
+

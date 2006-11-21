@@ -1,0 +1,10 @@
+setup.py
+src/cc/__init__.py
+src/cc.deedscraper.egg-info/PKG-INFO
+src/cc.deedscraper.egg-info/SOURCES.txt
+src/cc.deedscraper.egg-info/dependency_links.txt
+src/cc.deedscraper.egg-info/entry_points.txt
+src/cc.deedscraper.egg-info/namespace_packages.txt
+src/cc.deedscraper.egg-info/requires.txt
+src/cc.deedscraper.egg-info/top_level.txt
+src/cc/deedscraper/__init__.py
