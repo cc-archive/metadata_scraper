@@ -31,11 +31,16 @@ setup(
                         'rdfadict',
                         'simplejson',
                         'CherryPy>=3.0beta2',
+                        'PasteScript[WSGIUtils]',
                         ],
     namespace_packages = ['cc'],
 
     entry_points = { 'console_scripts':
-                     ['scrape_server = cc.deedscraper:serve',
+                     ['server = cc.deedscraper.server:serve',
+                      'paster = paste.script.command:run',
+                      ],
+                     'paste.app_factory':
+                     ['deedscraper = cc.deedscraper.server:app_factory',
                       ],
                      },
 
