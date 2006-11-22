@@ -1,3 +1,7 @@
+README
+bootstrap.py
+buildout.cfg
+server.cfg
 setup.py
 src/cc/__init__.py
 src/cc.deedscraper.egg-info/PKG-INFO
@@ -8,3 +12,5 @@ src/cc.deedscraper.egg-info/namespace_packages.txt
 src/cc.deedscraper.egg-info/requires.txt
 src/cc.deedscraper.egg-info/top_level.txt
 src/cc/deedscraper/__init__.py
+src/cc/deedscraper/app.py
+src/cc/deedscraper/server.py

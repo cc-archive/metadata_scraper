@@ -1,3 +1,7 @@
+[paste.app_factory]
+deedscraper = cc.deedscraper.server:app_factory
+
 [console_scripts]
-scrape_server = cc.deedscraper:serve
+paster = paste.script.command:run
+server = cc.deedscraper.server:serve
 
