@@ -35,7 +35,11 @@ def serve(host='localhost', port=8082):
 def app_factory(*args):
     """Application factory for use with Python Paste deployments."""
 
+    from app import DeedScraper
+    
     wsgi_app = cherrypy.Application(DeedScraper(), '/')
+
+    cherrypy.engine.autoreload_match = None
     cherrypy.engine.start(blocking=False)
     
     return wsgi_app
