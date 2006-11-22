@@ -79,5 +79,12 @@ def serve(host='localhost', port=8082):
     cherrypy.server.quickstart()
     cherrypy.engine.start()
 
+def app_factory(*args):
+
+    wsgi_app = cherrypy.Application(DeedScraper(), '/')
+    cherrypy.engine.start(blocking=False)
+    
+    return wsgi_app
+
 if __name__ == '__main__':
     serve()
