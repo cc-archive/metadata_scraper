@@ -44,6 +44,8 @@ class DeedScraper(object):
     @jsondefault
     def scrape(self, url):
 
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+
         # parse the RDFa from the document
         parser = rdfadict.RdfaParser() 
         triples = parser.parseurl(url)
@@ -71,7 +73,7 @@ class DeedScraper(object):
                             }
 
         # return the data encoded as JSON
-        return simplejson.dumps(attribution_info)
+        return "(%s)" % simplejson.dumps(attribution_info)
     
 if __name__ == '__main__':
 
