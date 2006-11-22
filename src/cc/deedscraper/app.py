@@ -22,6 +22,7 @@ import os
 import cherrypy
 import simplejson
 import rdfadict
+import urlparse
 
 def jsondefault(func):
     """Decorator which catches any exceptions thrown by [func] and returns
@@ -59,12 +60,14 @@ class DeedScraper(object):
             'http://web.resource.org/cc/attributionURL', [''])[0]
         more_perms = triples[url].get(
             'http://web.resource.org/cc/morePermissions', [''])[0]
+        more_perms_domain = urlparse.urlparse(more_perms)[1]
         
         # assemble a dictionary to serialize
         attribution_info = {'licenseUrl':license_url,
                             'attributionName':attr_name,
                             'attributionUrl':attr_url,
-                            'morePermissions':more_perms
+                            'morePermissions':more_perms,
+                            'morePermissionsDomain':more_perms_domain,
                             }
 
         # return the data encoded as JSON
