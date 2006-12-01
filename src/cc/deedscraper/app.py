@@ -50,18 +50,20 @@ class DeedScraper(object):
         parser = rdfadict.RdfaParser() 
         triples = parser.parseurl(url)
 
+        ns_cc = 'http://creativecommons.org/ns#'
+
         # extract the bits we care about
         license_url = triples.setdefault(url, {}).get(
             'http://www.w3.org/1999/xhtml#license', triples[url].get(
-            'http://web.resource.org/cc/license', [''])
+            ns_cc+'license', [''])
                                        )[0]
 
         attr_name = triples[url].get(
-            'http://web.resource.org/cc/attributionName', [''])[0]
+            ns_cc+'attributionName', [''])[0]
         attr_url =  triples[url].get(
-            'http://web.resource.org/cc/attributionURL', [''])[0]
+            ns_cc+'attributionURL', [''])[0]
         more_perms = triples[url].get(
-            'http://web.resource.org/cc/morePermissions', [''])[0]
+            ns_cc+'morePermissions', [''])[0]
         more_perms_domain = urlparse.urlparse(more_perms)[1]
         
         # assemble a dictionary to serialize
