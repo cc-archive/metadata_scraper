@@ -51,19 +51,28 @@ class DeedScraper(object):
         triples = parser.parseurl(url)
 
         ns_cc = 'http://creativecommons.org/ns#'
+        ns_wr = 'http://web.resource.org/cc/'
+        ns_xh = 'http://www.w3.org/1999/xhtml#'
 
         # extract the bits we care about
         license_url = triples.setdefault(url, {}).get(
-            'http://www.w3.org/1999/xhtml#license', triples[url].get(
-            ns_cc+'license', [''])
-                                       )[0]
-
-        attr_name = triples[url].get(
-            ns_cc+'attributionName', [''])[0]
-        attr_url =  triples[url].get(
-            ns_cc+'attributionURL', [''])[0]
-        more_perms = triples[url].get(
-            ns_cc+'morePermissions', [''])[0]
+            ns_xh+'license', triples[url].get(
+            ns_cc+'license', ['']))[0]
+        #attr_name = triples[url].get(
+        #   ns_cc+'attributionName', [''])[0]
+        attr_name = triples.setdefault(url, {}).get(
+            ns_cc+'attributionName', triples[url].get(
+            ns_wr+'attributionName', ['']))[0]
+        #attr_url =  triples[url].get(
+        #    ns_cc+'attributionURL', [''])[0]
+        attr_url = triples.setdefault(url, {}).get(
+            ns_cc+'attributionURL', triples[url].get(
+            ns_wr+'attributionURL', ['']))[0]
+        #more_perms = triples[url].get(
+        #    ns_cc+'morePermissions', [''])[0]
+        more_perms = triples.setdefault(url, {}).get(
+            ns_cc+'morePermissions', triples[url].get(
+            ns_wr+'morePermissions', ['']))[0]
         more_perms_domain = urlparse.urlparse(more_perms)[1]
         
         # assemble a dictionary to serialize
