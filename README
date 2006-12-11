@@ -32,6 +32,16 @@ For example::
   $ python bootstrap.py
   $ ./bin/buildout
 
+Running the ``buildout`` command will download any uninstalled dependencies
+as Python Eggs and place them in an ``./eggs`` sub-directory.  It will also
+create a script in ``./bin``, ``paster``, which can be used to run the 
+metadata scaper as an independent server process.  
+
+.. note:: zc.buildout is intended for use as an installation construction
+   tool, and as such "bakes in" explicit paths to eggs it downloads.  If
+   it is necessary to move an installation of the software, you *must*
+   run ``buildout`` again.
+
 Usage
 *****
 
