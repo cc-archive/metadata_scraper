@@ -1,0 +1,17 @@
+README
+buildout.cfg
+check.sh
+server.cfg
+setup.py
+bootstrap/bootstrap.py
+cc/__init__.py
+cc.deedscraper.egg-info/PKG-INFO
+cc.deedscraper.egg-info/SOURCES.txt
+cc.deedscraper.egg-info/dependency_links.txt
+cc.deedscraper.egg-info/entry_points.txt
+cc.deedscraper.egg-info/namespace_packages.txt
+cc.deedscraper.egg-info/requires.txt
+cc.deedscraper.egg-info/top_level.txt
+cc/deedscraper/__init__.py
+cc/deedscraper/app.py
+cc/deedscraper/server.py
