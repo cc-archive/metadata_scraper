@@ -1,6 +1,7 @@
 README
 bootstrap.py
 buildout.cfg
+check.sh
 server.cfg
 setup.py
 src/cc/__init__.py
