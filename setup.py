@@ -23,14 +23,13 @@ from setuptools import setup, find_packages
 setup(
     name = "cc.deedscraper",
     version = "0.1",
-    packages = find_packages('src'),
-    package_dir = {'':'src'},
+    packages = find_packages('.'),
 
     # scripts and dependencies
     install_requires = ['setuptools',
                         'rdfadict',
                         'simplejson',
-                        'CherryPy>=3.0beta2',
+                        'CherryPy',
                         'PasteScript[WSGIUtils]',
                         ],
     namespace_packages = ['cc'],
