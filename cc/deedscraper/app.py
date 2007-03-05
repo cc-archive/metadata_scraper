@@ -19,6 +19,7 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import os
+import gc
 import cherrypy
 import simplejson
 import rdfadict
@@ -84,8 +85,10 @@ class DeedScraper(object):
                             }
 
         # return the data encoded as JSON
-        return "(%s)" % simplejson.dumps(attribution_info)
-    
+        result = "(%s)" % simplejson.dumps(attribution_info)
+        gc.collect()
+
+        return result
 if __name__ == '__main__':
 
     import server

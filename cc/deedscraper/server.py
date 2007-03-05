@@ -27,7 +27,7 @@ def serve(host='localhost', port=8082):
     
     cherrypy.tree.mount(DeedScraper())
 
-    cherrypy.server.socket_host = host
+    # cherrypy.server.socket_host = host
     cherrypy.server.socket_port = port
     cherrypy.server.quickstart()
     cherrypy.engine.start()
