@@ -20,15 +20,17 @@
 
 import cherrypy
 
-def serve(host='localhost', port=8082):
+def serve(host='', port=8082):
     """Run the application using CherryPy's built-in server."""
 
     from app import DeedScraper
-    
+
+    cherrypy.config.environment = 'production'
     cherrypy.tree.mount(DeedScraper())
 
-    # cherrypy.server.socket_host = host
+    cherrypy.server.socket_host = host
     cherrypy.server.socket_port = port
+
     cherrypy.server.quickstart()
     cherrypy.engine.start()
 
