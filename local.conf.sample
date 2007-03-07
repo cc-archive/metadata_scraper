@@ -1,0 +1,4 @@
+[global]
+environment = 'production'
+# cc.org is set to proxy to 8002
+server.socket_port = 8002
