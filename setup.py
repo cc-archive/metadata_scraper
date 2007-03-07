@@ -1,4 +1,4 @@
-## Copyright (c) 2006 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2007 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "cc.deedscraper",
-    version = "0.1",
+    version = "0.2",
     packages = find_packages('.'),
 
     # scripts and dependencies
@@ -30,24 +30,22 @@ setup(
                         'rdfadict',
                         'simplejson',
                         'CherryPy',
-                        'PasteScript[WSGIUtils]',
                         ],
     namespace_packages = ['cc'],
 
     entry_points = { 'console_scripts':
                      ['server = cc.deedscraper.server:serve',
-                      'paster = paste.script.command:run',
                       ],
-                     'paste.app_factory':
-                     ['deedscraper = cc.deedscraper.server:app_factory',
-                      ],
+                     #'paste.app_factory':
+                     #['deedscraper = cc.deedscraper.server:app_factory',
+                     # ],
                      },
 
     # author metadata
     author = 'Nathan R. Yergler',
     author_email = 'nathan@creativecommons.org',
-    description = 'Scrape .',
+    description = 'Attribution metadata extractor.',
     license = 'MIT',
-    url = 'http://mta.sciencecommons.org',
+    url = 'http://creativecommons.org/license',
 
     )

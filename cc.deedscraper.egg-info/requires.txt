@@ -1,5 +1,4 @@
 setuptools
 rdfadict
 simplejson
-CherryPy>=3.0beta2
-PasteScript[WSGIUtils]
+CherryPy

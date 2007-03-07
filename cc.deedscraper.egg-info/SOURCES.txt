@@ -1,6 +1,7 @@
 README
 buildout.cfg
 check.sh
+scraper_zd.conf
 server.cfg
 setup.py
 bootstrap/bootstrap.py

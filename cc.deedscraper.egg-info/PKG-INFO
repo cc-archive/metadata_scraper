@@ -1,8 +1,8 @@
 Metadata-Version: 1.0
 Name: cc.deedscraper
-Version: 0.2a1
-Summary: Scrape .
-Home-page: http://mta.sciencecommons.org
+Version: 0.2
+Summary: Attribution metadata extractor.
+Home-page: http://creativecommons.org/license
 Author: Nathan R. Yergler
 Author-email: nathan@creativecommons.org
 License: MIT
