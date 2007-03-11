@@ -1,0 +1,37 @@
+#! /bin/bash
+
+PYTHON=$1
+
+rm -f ./*.log
+
+exec > test-output.log 2> test-errout.log
+
+fail=0
+
+cd mechanize/ && $PYTHON test-mechanize.py || fail=1
+cd ../
+
+cd mechanoid/ && $PYTHON test-mechanoid.py || fail=1
+cd ../
+
+cd urllib2/ && $PYTHON test-wsgi_urllib2.py || fail=1
+cd ../
+
+cd webtest/ && $PYTHON test-webtest.py || fail=1
+cd ../
+
+cd webunit/ && $PYTHON test-webunit.py || fail=1
+cd ../
+
+if [ $PYTHON = "python2.4" ]; then
+	cd zope_testbrowser/ && $PYTHON test-zope_testbrowser.py || fail=1
+	cd ../
+else
+	echo '** SKIPPING zope.testbrowser; req python2.4' > /dev/tty
+fi
+
+exec > /dev/tty 2> /dev/tty
+
+if [ $fail -eq 1 ]; then echo 'FAILURE'; else echo 'success.'; fi
+
+exit $fail
