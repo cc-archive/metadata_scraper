@@ -27,8 +27,8 @@ setup(
 
     # scripts and dependencies
     install_requires = ['setuptools',
-                        'rdfadict',
-                        'simplejson',
+                        'rdfadict>=0.3.2',
+                        'Simplejson',
                         'CherryPy',
                         ],
     namespace_packages = ['cc'],
