@@ -22,23 +22,24 @@ from setuptools import setup, find_packages
 
 setup(
     name = "cc.deedscraper",
-    version = "0.2",
-    packages = find_packages('.'),
+    version = "0.2.1",
+    packages = ['cc.deedscraper'],
 
     # scripts and dependencies
+    dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
                         'rdfadict>=0.3.2',
-                        'Simplejson',
+                        'SimpleJson',
                         'CherryPy',
+			'zdaemon'
                         ],
+    extras_require = {'testing':'wsgi_intercept[zope_testbrowser]'},
+
     namespace_packages = ['cc'],
 
     entry_points = { 'console_scripts':
                      ['server = cc.deedscraper.server:serve',
                       ],
-                     #'paste.app_factory':
-                     #['deedscraper = cc.deedscraper.server:app_factory',
-                     # ],
                      },
 
     # author metadata
