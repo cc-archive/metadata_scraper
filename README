@@ -7,9 +7,11 @@ Deed Metadata Scraper
 :Author: Nathan R. Yergler <nathan@creativecommons.org>
 :Organization: `Creative Commons <http://creativecommons.org>`_
 :Copyright: 
-   2006, Nathan R. Yergler, Creative Commons; 
+   2006-2007, Nathan R. Yergler, Creative Commons; 
    licensed to the public under the `MIT license 
    <http://opensource.org/licenses/mit-license.php>`_.
+
+.. contents::
 
 Overview
 ********
@@ -23,13 +25,12 @@ Installation
 ************
 
 The server and dependencies may be deployed using a combination of
-Subversion and `zc.buildout 
-<http://cheeseshop.python.org/pypi/zc.buildout/>`_.
+Subversion and `zc.buildout <http://cheeseshop.python.org/pypi/zc.buildout/>`_.
 For example::
 
   $ svn co https://svn.sourceforge.net/svnroot/cctools/metadata_scraper
   $ cd metadata_scraper
-  $ python bootstrap.py
+  $ python bootstrap/bootstrap.py
   $ ./bin/buildout
 
 Running the ``buildout`` command will download any uninstalled dependencies
@@ -42,20 +43,45 @@ metadata scaper as an independent server process.
    it is necessary to move an installation of the software, you *must*
    run ``buildout`` again.
 
-Usage
-*****
+Testing
+*******
 
-After running ``buildout``, the ``bin`` directory will contain a script, 
-``paster``, provided by `Python Paste <http://pythonpaste.org>`_.  This
-script can be used to run the threaded server.  For example::
+``buildout`` creates a script for running the application test suite::
 
-  $ ./bin/paster serve server.cfg
+  $ ./bin/test cc.deedscraper
 
-The server can be run in daemon mode using the ``--daemon`` option::
+This will run the full test suite, including the doctests contained in this
+document and any unit tests in the code.  Run::
 
-  $ ./bin/paster serve server.cfg --daemon
+  $ ./bin/test --help
 
-The host and port used are specified in server configuration file, 
-server.cfg.
+for a full list of options.
+
+Running the Server
+******************
+
+cc.deedscraper is a `WSGI <http://wsgi.org/wsgi>`_ application, and can be 
+run in a variety of containers.  The buildout will install and create a 
+script for running the application using CherryPy's built-in web server, 
+with the process managed by `zdaemon <http://python.org/pypi/zdaemon>`_.
+
+Before running the server a configuration file must be created.  A sample file,
+``local.conf.sample``, is provided in the ``cc.deedscraper`` package.  Simply
+copy this file to ``local.conf`` for the default settings.
+
+To start the application run::
+
+  $ ./bin/zdaemon -C scraper_zd.conf start
+
+Stopping the application is predictably done with::
+
+  $ ./bin/zdaemon -C scraper_zd.conf stop
+
+An interactive console can be access by running::
+
+  $ ./bin/zdaemon -C scraper_zd.conf
+
+Type ``help`` within the console to see a full list of available commands.
+
 
 
