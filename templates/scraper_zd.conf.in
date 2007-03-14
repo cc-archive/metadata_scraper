@@ -3,6 +3,10 @@
    transcript scraper.log
 </runner>
 
+<environment>
+LD_LIBRARY_PATH %(libxml2_path)s:%(libxslt_path)s
+</environment>
+
 <eventlog>
   <logfile>
     path ./zdaemon.log
