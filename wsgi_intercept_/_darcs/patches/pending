@@ -1,4 +1,0 @@
-{
-rmfile ./wsgi_intercept/zope_testbrowser/__init__.py
-move ./wsgi_intercept/zope_testbrowser/wsgi_testbrowser.py ./wsgi_intercept/zope_testbrowser/__init__.py
-}

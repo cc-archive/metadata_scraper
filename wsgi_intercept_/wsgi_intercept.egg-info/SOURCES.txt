@@ -1,9 +1,0 @@
-README.txt
-setup.py
-wsgi_intercept/__init__.py
-wsgi_intercept.egg-info/PKG-INFO
-wsgi_intercept.egg-info/SOURCES.txt
-wsgi_intercept.egg-info/dependency_links.txt
-wsgi_intercept.egg-info/requires.txt
-wsgi_intercept.egg-info/top_level.txt
-wsgi_intercept.egg-info/zip-safe
