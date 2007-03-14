@@ -21,15 +21,19 @@
 import os
 import cherrypy
 
+def get_localconf():
+    """Return a file-like object which can be read to load the local instance 
+    configuration."""
+
+    return file(os.path.join( os.path.dirname(__file__), 'local.conf' ))
+
 def serve():
     """Run the application using CherryPy's built-in server."""
 
     from app import DeedScraper
 
     # load the local configuration
-    cherrypy.config.update( file(
-            os.path.join( os.path.dirname(__file__), 'local.conf' )
-            ) )
+    cherrypy.config.update( get_localconf() )
 
     # mount the application
     cherrypy.tree.mount(DeedScraper())
