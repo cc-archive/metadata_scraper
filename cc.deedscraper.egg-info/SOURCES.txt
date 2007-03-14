@@ -1,6 +1,5 @@
 README
 buildout.cfg
-scraper_zd.conf
 setup.py
 bootstrap/bootstrap.py
 cc/__init__.py
@@ -24,3 +23,4 @@ cc/deedscraper/static/license.html
 cc/deedscraper/static/license_only1.html
 cc/deedscraper/static/license_only2.html
 cc/deedscraper/static/no_metadata.html
+templates/scraper_zd.conf.in
