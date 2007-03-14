@@ -1,8 +1,6 @@
 README
 buildout.cfg
-check.sh
 scraper_zd.conf
-server.cfg
 setup.py
 bootstrap/bootstrap.py
 cc/__init__.py
@@ -15,4 +13,14 @@ cc.deedscraper.egg-info/requires.txt
 cc.deedscraper.egg-info/top_level.txt
 cc/deedscraper/__init__.py
 cc/deedscraper/app.py
+cc/deedscraper/local.conf.sample
 cc/deedscraper/server.py
+cc/deedscraper/tests.py
+cc/deedscraper/static/__init__.py
+cc/deedscraper/static/attrib.html
+cc/deedscraper/static/cc_license.html
+cc/deedscraper/static/index.html
+cc/deedscraper/static/license.html
+cc/deedscraper/static/license_only1.html
+cc/deedscraper/static/license_only2.html
+cc/deedscraper/static/no_metadata.html
