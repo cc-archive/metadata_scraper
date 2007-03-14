@@ -46,16 +46,12 @@ metadata scaper as an independent server process.
 Testing
 *******
 
-``buildout`` creates a script for running the application test suite::
+``cc.deedscraper`` ships with a test runner::
 
-  $ ./bin/test cc.deedscraper
+  $ ./bin/python cc/deedscraper/tests.py
 
-This will run the full test suite, including the doctests contained in this
-document and any unit tests in the code.  Run::
-
-  $ ./bin/test --help
-
-for a full list of options.
+Note that ``./bin/python`` is a script created by zc.buildout which starts a
+Python interpreter with the application dependency eggs on the PYTHONPATH.
 
 Running the Server
 ******************

@@ -28,12 +28,11 @@ setup(
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
-                        'rdfadict>=0.3.2',
-                        'SimpleJson',
+                        'rdfadict>=0.3.3',
+                        'simplejson',
                         'CherryPy',
 			'zdaemon'
                         ],
-    extras_require = {'testing':'wsgi_intercept[zope_testbrowser]'},
 
     namespace_packages = ['cc'],
 
