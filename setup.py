@@ -22,13 +22,13 @@ from setuptools import setup, find_packages
 
 setup(
     name = "cc.deedscraper",
-    version = "0.2.1",
+    version = "0.2.2",
     packages = ['cc.deedscraper'],
 
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
-                        'rdfadict>=0.3.3',
+                        'rdfadict>=0.4.0',
                         'simplejson',
                         'CherryPy',
 			'zdaemon'
