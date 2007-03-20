@@ -1,5 +1,6 @@
 README
 buildout.cfg
+scraper_zd.conf
 setup.py
 bootstrap/bootstrap.py
 cc/__init__.py
