@@ -75,13 +75,24 @@ class DeedScraper(object):
             ns_cc+'morePermissions', triples[url].get(
             ns_wr+'morePermissions', ['']))[0]
         more_perms_domain = urlparse.urlparse(more_perms)[1]
-        
+
+        # allow ads with non-commercial use?
+        if ("http://creativecommons.org/ns#Advertising" in 
+            triples.setdefault(url, {}).get(ns_cc + 'permission', [])):
+           allow_ads = "Using this work on ad-supported sites is allowed."
+        elif ("http://creativecommons.org/ns#Advertising" in 
+            triples.setdefault(url, {}).get(ns_cc + 'prohibition', [])):
+           allow_ads = "Using this work on ad-supported sites is prohibited."
+        else:
+           allow_ads = False
+
         # assemble a dictionary to serialize
         attribution_info = {'licenseUrl':license_url,
                             'attributionName':attr_name,
                             'attributionUrl':attr_url,
                             'morePermissions':more_perms,
                             'morePermissionsDomain':more_perms_domain,
+                            'allowAdvertising':allow_ads,
                             }
 
         # return the data encoded as JSON
