@@ -19,11 +19,16 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import os
+import sys
 import gc
 import cherrypy
 import simplejson
 import rdfadict
 import urlparse
+
+if sys.version < (2,5):
+    # import set support
+    from sets import Set as set
 
 def jsondefault(func):
     """Decorator which catches any exceptions thrown by [func] and returns
@@ -100,6 +105,37 @@ class DeedScraper(object):
         gc.collect()
 
         return result
+
+    @cherrypy.expose
+    @jsondefault
+    def triples(self, url):
+
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+
+        # parse the RDFa from the document
+        parser = rdfadict.RdfaParser() 
+        triples = parser.parseurl(url)
+
+        ns_cc = 'http://creativecommons.org/ns#'
+        ns_wr = 'http://web.resource.org/cc/'
+
+        # mash web.resource assertions to cc.org/ns
+        for predicate in triples.get(ns_wr, {}):
+            for object in triples[ns_wr][predicate]:
+                triples.setdefault(ns_cc, {}).setdefault(predicate, []).append(
+                    object)
+
+            # cast it to a set and back to prevent duplication
+            triples[ns_wr][predicate] = list(
+                set(triples[ns_wr][predicate])
+                )
+
+        # return the data encoded as JSON
+        result = "(%s)" % simplejson.dumps(triples)
+        gc.collect()
+
+        return result
+
 if __name__ == '__main__':
 
     import server
