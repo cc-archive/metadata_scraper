@@ -120,15 +120,15 @@ class DeedScraper(object):
         ns_wr = 'http://web.resource.org/cc/'
 
         # mash web.resource assertions to cc.org/ns
-        for predicate in triples.get(ns_wr, {}):
-            for object in triples[ns_wr][predicate]:
-                triples.setdefault(ns_cc, {}).setdefault(predicate, []).append(
-                    object)
+        for s in triples.keys():
 
-            # cast it to a set and back to prevent duplication
-            triples[ns_wr][predicate] = list(
-                set(triples[ns_wr][predicate])
-                )
+            # walk each predicate, checking if it's in the web.resource ns
+            for p in triples[s].keys():
+
+                if p.find(ns_wr) == 0:
+                    # map this back to cc.org/ns#
+                    triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
+                    del triples[s][p]
 
         # return the data encoded as JSON
         result = "(%s)" % simplejson.dumps(triples)
