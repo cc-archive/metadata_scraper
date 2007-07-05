@@ -91,13 +91,23 @@ class DeedScraper(object):
         else:
            allow_ads = False
 
+        # BUMA commerical rights support
+        commercial_license = triples.setdefault(url, {}).get(
+            ns_cc+'commercialLicense', triples[url].get(
+            ns_wr+'commercialLicense', ['']))[0]
+        more_perms_agent = triples.setdefault(url, {}).get(
+            ns_cc+'morePermissionsAgentTitle', triples[url].get(
+            ns_wr+'morePermissionsAgentTitle', ['']))[0]
+        
         # assemble a dictionary to serialize
         attribution_info = {'licenseUrl':license_url,
                             'attributionName':attr_name,
                             'attributionUrl':attr_url,
                             'morePermissions':more_perms,
                             'morePermissionsDomain':more_perms_domain,
+                            'morePermissionsAgent':more_perms_agent,
                             'allowAdvertising':allow_ads,
+                            'commercialLicense':commercial_license,
                             }
 
         # return the data encoded as JSON

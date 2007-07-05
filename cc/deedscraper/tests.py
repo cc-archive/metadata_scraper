@@ -23,12 +23,35 @@
 import os
 import doctest
 import unittest
+import simplejson
 
 import cherrypy
 from cherrypy.test import helper
 
 import cc.deedscraper.app
 
+def formatted_response(**kwargs):
+    """Returns a string which contains *at least* the standard fields returned
+    by the metadata scraper application, as well as any option **kwargs
+    provided."""
+
+    # construct the default (empty) response
+    result = {'licenseUrl':'',
+              'attributionName':'',
+              'attributionUrl':'',
+              'morePermissions':'',
+              'morePermissionsDomain':'',
+              'morePermissionsAgent':'',
+              'allowAdvertising':False,
+              'commercialLicense':'',
+            }
+
+    # update the response with any optional values provided
+    for k in kwargs:
+        result[k] = kwargs[k]
+        
+    return "(%s)" % simplejson.dumps(result)
+    
 class DefaultValuesTest(helper.CPWebCase):
 
     def testNoRootMethod(self):
@@ -52,19 +75,16 @@ class ScrapingTests(helper.CPWebCase):
 
         self.getPage('/scrape?url=http://localhost:8080/static/no_metadata.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "", '
-                        '"morePermissions": "", "attributionUrl": "", '
-                        '"attributionName": "", "licenseUrl": ""})')
-
+        self.assertBody(formatted_response())
+        
     def testLicenseMetadata(self):
         """Scrape an xhtml:license assertion."""
 
         self.getPage('/scrape?url=http://localhost:8080/static/license.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "", '
-                        '"morePermissions": "", "attributionUrl": "", '
-                        '"attributionName": "", '
-                        '"licenseUrl": "http:\/\/creativecommons.org\/licenses\/by\/3.0\/"})')
+        self.assertBody(formatted_response(
+            licenseUrl = r"http://creativecommons.org/licenses/by/3.0/")
+                        )
 
     def testCcLicenseMetadata(self):
         """Scrape a cc:license assertion (with or without namespace declaration)."""
@@ -72,51 +92,50 @@ class ScrapingTests(helper.CPWebCase):
         # with namespace declaration
         self.getPage('/scrape?url=http://localhost:8080/static/license_only1.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "", '
-                        '"morePermissions": "", "attributionUrl": "", '
-                        '"attributionName": "", '
-                        '"licenseUrl": "http:\/\/creativecommons.org\/licenses\/by\/3.0\/"})')
+        self.assertBody(formatted_response(
+            licenseUrl = r"http://creativecommons.org/licenses/by/3.0/")
+                        )
 
         # without namespace declaration
         self.getPage('/scrape?url=http://localhost:8080/static/license_only2.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "", '
-                        '"morePermissions": "", "attributionUrl": "", '
-                        '"attributionName": "", '
-                        '"licenseUrl": "http:\/\/creativecommons.org\/licenses\/by\/3.0\/"})')
+        self.assertBody(formatted_response(
+            licenseUrl = r"http://creativecommons.org/licenses/by/3.0/")
+                        )
 
     def testDefaultccNamespace(self):
-        """The cc: namesapce defaults to http://web.resource.org/cc#"""
+        """The cc: namespace defaults to http://web.resource.org/cc#"""
 
         self.getPage('/scrape?url=http://localhost:8080/static/cc_license.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "magnatune.com", '
-                        '"morePermissions": "https:\/\/magnatune.com\/artists\/Solace", '
-                        '"attributionUrl": "http:\/\/localhost:8080\/artists\/solace", '
-                        '"attributionName": "Solace", '
-                        '"licenseUrl": "http:\/\/creativecommons.org\/licenses\/by\/3.0\/"})')
+        self.assertBody(formatted_response(
+            morePermissionsDomain = r'magnatune.com',
+            morePermissions = r'https://magnatune.com/artists/Solace',
+            attributionUrl = r'http://localhost:8080/artists/solace',
+            attributionName = r'Solace',
+            licenseUrl = r"http://creativecommons.org/licenses/by/3.0/")
+                        )
 
     def testAttributionMetadata(self):
         """Test full metdata extraction."""
 
         self.getPage('/scrape?url=http://localhost:8080/static/attrib.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "magnatune.com", '
-                        '"morePermissions": "https:\/\/magnatune.com\/artists\/Solace", '
-                        '"attributionUrl": "http:\/\/localhost:8080\/artists\/solace", '
-                        '"attributionName": "Solace", '
-                        '"licenseUrl": "http:\/\/creativecommons.org\/licenses\/by\/3.0\/"})')
+        self.assertBody(formatted_response(
+            morePermissionsDomain = r'magnatune.com',
+            morePermissions = r'https://magnatune.com/artists/Solace',
+            attributionUrl = r'http://localhost:8080/artists/solace',
+            attributionName = r'Solace',
+            licenseUrl = r"http://creativecommons.org/licenses/by/3.0/")
+                        )
 
     def test404(self):
         """Errors resulting from page requests should result in am empty set."""
 
         self.getPage('/scrape?url=http://localhost:8080/static/a404.html')
         self.assertStatus(200)
-        self.assertBody('({"morePermissionsDomain": "", '
-                        '"morePermissions": "", "attributionUrl": "", '
-                        '"attributionName": "", '
-                        '"licenseUrl": ""})')
-
+        self.assertBody(formatted_response())
+        
 class AttributionTest(helper.CPWebCase):
     """Some pages will only contain attribution metadata."""
 
@@ -125,6 +144,18 @@ class AttributionTest(helper.CPWebCase):
         self.getPage('/static/index.html')
         self.assertStatus(200)
 
+    def testCommercialLicense(self):
+        """Test extraction of commercial license URL [implemented for BUMA
+        testing]."""
+
+        self.getPage('/scrape?url=http://localhost:8080/static/test_buma.html')
+        self.assertStatus(200)
+        self.assertBody(formatted_response(
+            licenseUrl = r'http://creativecommons.org/licenses/by-nc-sa/2.5/nl/',
+            morePermissionsAgent = r'Buma/Stemra',
+            commercialLicense = r'http://example.com/license?id=asdsada')
+                        )
+        
 def bootstrap_app():
     """Bootstrap the application and configuration for testing."""
 
