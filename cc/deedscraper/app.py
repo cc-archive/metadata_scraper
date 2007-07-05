@@ -59,6 +59,7 @@ class DeedScraper(object):
         ns_cc = 'http://creativecommons.org/ns#'
         ns_wr = 'http://web.resource.org/cc/'
         ns_xh = 'http://www.w3.org/1999/xhtml#'
+        ns_dc = 'http://purl.org/dc/elements/1.1/'
 
         # extract the bits we care about
         license_url = triples.setdefault(url, {}).get(
@@ -91,14 +92,21 @@ class DeedScraper(object):
         else:
            allow_ads = False
 
-        # BUMA commerical rights support
+        # commerical rights / agent support
         commercial_license = triples.setdefault(url, {}).get(
             ns_cc+'commercialLicense', triples[url].get(
             ns_wr+'commercialLicense', ['']))[0]
-        more_perms_agent = triples.setdefault(url, {}).get(
-            ns_cc+'morePermissionsAgentTitle', triples[url].get(
-            ns_wr+'morePermissionsAgentTitle', ['']))[0]
-        
+        more_perms_agent = ''
+
+        if commercial_license:
+            # check for agent information
+            dc_publisher = triples.setdefault(commercial_license, {}).get(
+                ns_dc + 'publisher', [None])[0]
+
+            if dc_publisher:
+                more_perms_agent = triples.setdefault(dc_publisher, {}).get(
+                    ns_dc + 'title', [''])[0]
+
         # assemble a dictionary to serialize
         attribution_info = {'licenseUrl':license_url,
                             'attributionName':attr_name,

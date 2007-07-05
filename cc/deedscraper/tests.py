@@ -153,7 +153,7 @@ class AttributionTest(helper.CPWebCase):
         self.assertBody(formatted_response(
             licenseUrl = r'http://creativecommons.org/licenses/by-nc-sa/2.5/nl/',
             morePermissionsAgent = r'Buma/Stemra',
-            commercialLicense = r'http://example.com/license?id=asdsada')
+            commercialLicense = r'http://example.com/more_perms?work=foo')
                         )
         
 def bootstrap_app():

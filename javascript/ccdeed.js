@@ -1,3 +1,5 @@
+/* Referrer Metadata support for Creative Commons License Deeds */
+
 function makeRequest(url) {
     var http_request = false;
 
@@ -67,16 +69,29 @@ function injectReferrerMetadata(response) {
 
     morePermissionsURL = addQSParameter(morePermissionsURL, 'cc-referrer', document.referrer);
 
+    var more_perms = '';
+
     if (morePermissionsURL && morePermissionsDomain) {
 
-	var more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href='";
+	more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href='";
 	more_perms += morePermissionsURL;
 	more_perms += "'>" + morePermissionsDomain + "</a></strong>.</li>";
 
-	document.getElementById('more-container').innerHTML = more_perms;
-	document.getElementById('more-container').setAttribute("class", "license more");
 
     }
+
+    if (metadata.commercialLicense && metadata.morePermissionsAgent) {
+       if (more_perms) more_perms += '<br/>';
+
+       more_perms += '<strong>Commercial Licensing</strong> is available from';
+       more_perms += ' <strong><a href="' + metadata.commercialLicense + '">';
+       more_perms += metadata.morePermissionsAgent + '</a></strong>.';
+
+    } // commercial license
+
+    // set the more perms / commercial usage statement
+    document.getElementById('more-container').innerHTML = more_perms;
+    document.getElementById('more-container').setAttribute("class", "license more");
 
     var noncomm_ads = metadata.allowAdvertising;
     if (document.getElementById('nc-more-container') && noncomm_ads) {
