@@ -28,7 +28,7 @@ setup(
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
-                        'rdfadict[tidy]>=0.4.1',
+                        'rdfadict[tidy]>=0.4.2',
                         'simplejson',
                         'CherryPy',
 			'zdaemon'
