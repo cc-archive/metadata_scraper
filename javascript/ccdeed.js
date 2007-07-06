@@ -90,8 +90,10 @@ function injectReferrerMetadata(response) {
     } // commercial license
 
     // set the more perms / commercial usage statement
-    document.getElementById('more-container').innerHTML = more_perms;
-    document.getElementById('more-container').setAttribute("class", "license more");
+    if (more_perms) {
+        document.getElementById('more-container').innerHTML = more_perms;
+        document.getElementById('more-container').setAttribute("class", "license more");
+    } 
 
     var noncomm_ads = metadata.allowAdvertising;
     if (document.getElementById('nc-more-container') && noncomm_ads) {
