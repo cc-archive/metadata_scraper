@@ -83,9 +83,10 @@ function injectReferrerMetadata(response) {
     if (metadata.commercialLicense && metadata.morePermissionsAgent) {
        if (more_perms) more_perms += '<br/>';
 
-       more_perms += '<strong>Commercial Licensing</strong> is available from';
+       more_perms += '<strong>Commerciële Rechten</strong>. ';
+       more_perms += 'Licenties voor commercieel gebruik zijn via';
        more_perms += ' <strong><a href="' + metadata.commercialLicense + '">';
-       more_perms += metadata.morePermissionsAgent + '</a></strong>.';
+       more_perms += metadata.morePermissionsAgent + '</a></strong> verkrijgbaar.';
 
     } // commercial license
 
