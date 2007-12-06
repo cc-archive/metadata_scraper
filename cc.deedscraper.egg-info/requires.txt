@@ -1,5 +1,0 @@
-setuptools
-rdfadict[tidy]>=0.4.2
-simplejson
-CherryPy
-zdaemon

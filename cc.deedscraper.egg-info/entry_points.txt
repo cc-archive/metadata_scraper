@@ -1,3 +1,0 @@
-[console_scripts]
-server = cc.deedscraper.server:serve
-
