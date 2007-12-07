@@ -82,18 +82,83 @@ function addQSParameter(url, key, value) {
 
 } // addQSParameter
 
+function add_dedication(metadata, subject) {
+
+   // get the actor name
+   actor_url = metadata[subject]['http://creativecommons.org/ns#dedicator'][0];
+   if (metadata[actor_url] &&
+       metadata[actor_url]['http://purl.org/dc/elements/1.1/title'])
+      actor = metadata[actor_url]['http://purl.org/dc/elements/1.1/title'][0];
+   else
+      actor = actor_url;
+
+   // get the work information
+   work_url = subject;
+   if (metadata[work_url]['http://purl.org/dc/elements/1.1/title'])
+      work = metadata[work_url]['http://purl.org/dc/elements/1.1/title'][0];
+   else
+      work = work_url;
+
+   // assemble the text
+   dedication  = "<a href='" + actor_url + "'>" + actor + "</a> ";
+   dedication += "has dedicated ";
+   dedication += "<a href='" + work_url + "'>" + work + "</a> ";
+   dedication += "to be free of any legal obligations whatsoever. ";
+   dedication += "To the extent possible under the law, ";
+   dedication += actor + " waives all copyright, moral right, ";
+   dedication += "database rights, and any other rights that might be ";
+   dedication += "asserted over " + work;
+
+   document.getElementById('nolaw-text').innerHTML = dedication;
+
+} // add_dedication
+
+function add_certification(metadata, subject) {
+
+   // get the actor name
+   actor_url = metadata[subject]['http://creativecommons.org/ns#certifier'][0];
+   if (metadata[actor_url] &&
+       metadata[actor_url]['http://purl.org/dc/elements/1.1/title'])
+      actor = metadata[actor_url]['http://purl.org/dc/elements/1.1/title'][0];
+   else
+      actor = actor_url;
+
+   // get the work information
+   work_url = subject;
+   if (metadata[work_url]['http://purl.org/dc/elements/1.1/title'])
+      work = metadata[work_url]['http://purl.org/dc/elements/1.1/title'][0];
+   else
+      work = work_url;
+
+   // assemble the text
+   certification = "<a href='" + actor_url + "'>" + actor + "</a> ";
+   certification += "has certified that ";
+   certification += "<a href='" + work_url + "'>" + work + "</a> ";
+   certification += "is free of any copyrights.";
+
+   document.getElementById('nolaw-text').innerHTML = certification;
+
+} // add_certification
+
 function injectReferrerMetadata(response) {
 
     metadata = eval(response);
-    alert(metadata);
 
-    // look for dedications
-    var i = 0;
-    for (i = 0; i < metadata.length; i++) {
-	alert(metadata[i]);
+    // look for certifications and dedications
+    for (s in metadata) {
+    	for (p in metadata[s]) {
+	   if (p == 'http://creativecommons.org/ns#dedicator') {
+	      // this contains a dedication
+	      add_dedication(metadata, s);
+	      }
+
+	   if (p == 'http://creativecommons.org/ns#certifier') {
+	      // this contains a certification
+	      add_certification(metadata, s);
+	      }
+
+	}
     }
-
-    // look for certifications
 
 } // injectReferrerMetadata
 
