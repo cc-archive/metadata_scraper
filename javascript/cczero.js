@@ -140,6 +140,18 @@ function add_certification(metadata, subject) {
 
 } // add_certification
 
+function add_norms(metadata, subject) {
+
+   norms_url = metadata[subject]['http://creativecommons.org/ns#scienceNorms'][0];
+
+   statement = "<br/>Additional details are available at ";
+   statement += "<a href='" + norms_url + "'>" + norms_url + "</a>.";
+
+   document.getElementById('norms-container').innerHTML += statement
+   document.getElementById('deed-conditions').style.display = 'block';
+
+} // add_norms
+
 function injectReferrerMetadata(response) {
 
     metadata = eval(response);
@@ -157,6 +169,10 @@ function injectReferrerMetadata(response) {
 	      add_certification(metadata, s);
 	      }
 
+	   if (p == 'http://creativecommons.org/ns#scienceNorms') {
+	      // this contains a science norms link
+	      add_norms(metadata, s);
+	      }
 	}
     }
 
