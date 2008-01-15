@@ -2,7 +2,7 @@
  * cczero.js
  * Support for dynamic CC0 deeds.
  * 
- * copyright 2007, Creative Commons, Nathan R. Yergler
+ * copyright 2007-2008, Creative Commons, Nathan R. Yergler
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -85,7 +85,7 @@ function addQSParameter(url, key, value) {
 function add_dedication(metadata, subject) {
 
    // get the actor name
-   actor_url = metadata[subject]['http://creativecommons.org/ns#dedicator'][0];
+   actor_url = metadata[subject]['http://creativecommons.org/ns#waivedBy'][0];
    if (metadata[actor_url] &&
        metadata[actor_url]['http://purl.org/dc/elements/1.1/title'])
       actor = metadata[actor_url]['http://purl.org/dc/elements/1.1/title'][0];
@@ -116,7 +116,7 @@ function add_dedication(metadata, subject) {
 function add_certification(metadata, subject) {
 
    // get the actor name
-   actor_url = metadata[subject]['http://creativecommons.org/ns#certifier'][0];
+   actor_url = metadata[subject]['http://creativecommons.org/ns#assertedBy'][0];
    if (metadata[actor_url] &&
        metadata[actor_url]['http://purl.org/dc/elements/1.1/title'])
       actor = metadata[actor_url]['http://purl.org/dc/elements/1.1/title'][0];
@@ -159,12 +159,12 @@ function injectReferrerMetadata(response) {
     // look for certifications and dedications
     for (s in metadata) {
     	for (p in metadata[s]) {
-	   if (p == 'http://creativecommons.org/ns#dedicator') {
+	   if (p == 'http://creativecommons.org/ns#waivedBy') {
 	      // this contains a dedication
 	      add_dedication(metadata, s);
 	      }
 
-	   if (p == 'http://creativecommons.org/ns#certifier') {
+	   if (p == 'http://creativecommons.org/ns#assertedBy') {
 	      // this contains a certification
 	      add_certification(metadata, s);
 	      }
