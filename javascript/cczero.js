@@ -101,13 +101,10 @@ function add_dedication(metadata, subject) {
 
    // assemble the text
    dedication  = "<a href='" + actor_url + "'>" + actor + "</a> ";
-   dedication += "has dedicated ";
-   dedication += "<a href='" + work_url + "'>" + work + "</a> ";
-   dedication += "to be free of any legal obligations whatsoever. ";
-   dedication += "To the extent possible under the law, ";
-   dedication += actor + " waives all copyright, moral right, ";
-   dedication += "database rights, and any other rights that might be ";
-   dedication += "asserted over " + work;
+   dedication += "affirms he or she owns the copyright interests to ";
+   dedication += "<a href='" + work_url + "'>" + work + "</a>";
+   dedication += ", and hereby waives all of those interests and any ";
+   dedication += "related or neighboring legal rights in the work.";
 
    document.getElementById('nolaw-text').innerHTML = dedication;
 
@@ -132,7 +129,7 @@ function add_certification(metadata, subject) {
 
    // assemble the text
    certification = "<a href='" + actor_url + "'>" + actor + "</a> ";
-   certification += "has certified that ";
+   certification += "has asserted that ";
    certification += "<a href='" + work_url + "'>" + work + "</a> ";
    certification += "is free of any copyrights.";
 
