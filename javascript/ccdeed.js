@@ -60,10 +60,35 @@ function injectReferrerMetadata(response) {
     var attributionName = metadata.attributionName;
     var attributionUrl = metadata.attributionUrl;
 
+    var licenseCode = document.getElementById('license-code').value;
+    var licenseUrl = document.getElementById('license-url').value;
+    var copyPasteAttrib = null;
+
+    // Attribution metadata
     if (attributionName && attributionUrl) {
-	document.getElementById('attribution-container').innerHTML = "You must attribute this work to <strong><a href='" + attributionUrl + "'>" + attributionName + "</a></strong> (with link)."; // <a onclick=\"window.open('/includes/by-popup.html', 'attribution_help', 'width=375,height=300,scrollbars=yes,resizable=yes,toolbar=no,directories=no,location=yes,menubar=no,status=yes');return false;\" href=''>Find out how.</a>";
+	document.getElementById('attribution-container').innerHTML = "You must attribute this work to <strong><a href='" + attributionUrl + "'>" + attributionName + "</a></strong> (with link)."; 
+
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + document.referrer + '"><a rel="cc:attributionURL" property="cc:attributionName" href="' + attributionUrl + '">' + attributionName + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+
+    } else if (attributionName) {
+	// name only 
+
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + document.referrer + '"><span property="cc:attributionName">' + attributionName + '</span> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+	
+    } else if (attributionURL) {
+	// URL only
+
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + document.referrer + '"><a rel="cc:attributionURL" href="' + attributionUrl + '">' + attributionUrl + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+
     }
 
+    // update copy/paste attribution if we can
+    if (copyPasteAttrib != null) {
+	document.getElementById('work-attribution').value = copyPasteAttrib;
+	document.getElementById('work-attribution-container').style.display = 'block';
+    } // copy/paste
+
+    // CC+
     var morePermissionsURL = metadata.morePermissions;
     var morePermissionsDomain = metadata.morePermissionsDomain;
 
