@@ -147,9 +147,13 @@ class DeedScraper(object):
                     # map this back to cc.org/ns#
                     triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
                     del triples[s][p]
+        
+        # get a list of the keys and include it for convenience 
+        subjects = triples.keys()[:]
+        triples['_subjects'] = subjects
 
         # return the data encoded as JSON
-        result = "(%s)" % simplejson.dumps(triples)
+        result = simplejson.dumps(triples)
         gc.collect()
 
         return result
