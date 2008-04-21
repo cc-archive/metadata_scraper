@@ -113,7 +113,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
     if (morePermissionsURL) 
 	morePermissionsURL = addQSParameter(morePermissionsURL, 'cc-referrer', document.referrer);
 
-    alert('bar');
     var more_perms = '';
 
     if (morePermissionsURL && morePermissionsDomain) {
@@ -134,7 +133,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
     } // commercial license
 
     // set the more perms / commercial usage statement
-    alert('blarf!');
     if (more_perms) {
         document.getElementById('more-container').innerHTML = more_perms;
         document.getElementById('more-container').setAttribute("class", "license more");
