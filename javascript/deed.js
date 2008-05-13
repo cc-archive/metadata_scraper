@@ -205,25 +205,60 @@ YAHOO.cc.attribution.add_copy_paste = function (metadata, subject) {
 // **  Parsing/Scraping/Dispatch
 // **
 
+YAHOO.cc.license = function (metadata, subject) {
+
+    // Return the license URI for the given subject; if no license is
+    // asserted, return null.  This looks for xhtml:license, dc:license,
+    // and cc:license in that order.
+
+    if (!metadata[subject]) return null;
+
+    var license = metadata[subject]['http://www.w3.org/1999/xhtml#license'] ||
+	metadata[subject]['http://www.w3.org/1999/xhtml#license'] ||
+        metadata[subject]['http://creativecommons.org/ns#license'] || 
+        null;
+
+    if (license) return license[0];
+
+    return null;
+
+} // license
+
 YAHOO.cc.success = function (response) {
 
     if (response.status != 200) return;
 
     var referer = response.argument;
+    var license_url = document.URL;
     var metadata = YAHOO.lang.JSON.parse(response.responseText);
 
-    // look for the referrer
-    if (metadata._subjects.indexOf(referer) > -1) {
-
+    // see if the referrer has metadata and is licensed under this license
+    if ( (metadata._subjects.indexOf(referer) > -1) &&
+         (YAHOO.cc.license(metadata, referer) == license_url) ) {
+       
 	YAHOO.cc.plus.insert(metadata, referer);
 
 	YAHOO.cc.attribution.add_details(metadata, referer);
 	YAHOO.cc.attribution.add_copy_paste(metadata, referer);
 
-    } else if (metadata._subjects.length == 1) {
+    } else {
+	
+	// more than one subject, look and see if only one points @ this license
+	var license_subjects = [];
 
-	// only one subject, not the referer
-	YAHOO.cc.attribution.add_copy_paste(metadata, metadata._subjects[0]);
+	for (var i = 0; i < metadata._subjects.length; i++) {
+	    if (YAHOO.cc.license(metadata, metadata._subjects[i]) == license_url) {
+		license_subjects.push(metadata._subjects[i]);
+	    } // if (subject -> license -> document.URL) is asserted
+
+	} // for each subject
+
+	// see if more than one matches
+	if (license_subjects.length == 1) {
+	    // only one, we can make an assertion
+	    YAHOO.cc.attribution.add_copy_paste(metadata, license_subjects[0]);
+	}
+
     }
 
 } // success
