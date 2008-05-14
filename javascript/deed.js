@@ -205,7 +205,19 @@ YAHOO.cc.attribution.add_copy_paste = function (metadata, subject) {
 // **  Parsing/Scraping/Dispatch
 // **
 
-YAHOO.cc.license = function (metadata, subject) {
+YAHOO.cc.license_uri = function(license_uri) {
+
+    // ensure that the license_uri is canonical
+    // note that this is a CC-ism, although this only runs in deeds @ CC,
+    // so we're fine with that
+
+    if (license_uri.charAt(license_uri.length - 1) == '/') return license_uri;
+
+    return license_uri.substring(0, license_uri.lastIndexOf('/') + 1);
+
+} // license_uri
+
+YAHOO.cc.get_license = function (metadata, subject) {
 
     // Return the license URI for the given subject; if no license is
     // asserted, return null.  This looks for xhtml:license, dc:license,
@@ -222,24 +234,22 @@ YAHOO.cc.license = function (metadata, subject) {
 
     return null;
 
-} // license
+} // get_license
 
 YAHOO.cc.success = function (response) {
 
     if (response.status != 200) return;
 
     var referer = response.argument;
-    var license_url = document.URL;
+    var license_url = YAHOO.cc.license_uri(document.URL);
     var metadata = YAHOO.lang.JSON.parse(response.responseText);
+    var subject = null;
 
     // see if the referrer has metadata and is licensed under this license
     if ( (metadata._subjects.indexOf(referer) > -1) &&
-         (YAHOO.cc.license(metadata, referer) == license_url) ) {
-       
-	YAHOO.cc.plus.insert(metadata, referer);
+         (YAHOO.cc.get_license(metadata, referer) == license_url) ) {
 
-	YAHOO.cc.attribution.add_details(metadata, referer);
-	YAHOO.cc.attribution.add_copy_paste(metadata, referer);
+	subject = referer;
 
     } else {
 	
@@ -247,19 +257,27 @@ YAHOO.cc.success = function (response) {
 	var license_subjects = [];
 
 	for (var i = 0; i < metadata._subjects.length; i++) {
-	    if (YAHOO.cc.license(metadata, metadata._subjects[i]) == license_url) {
+	    if (YAHOO.cc.get_license(metadata, metadata._subjects[i]) == 
+		license_url) {
 		license_subjects.push(metadata._subjects[i]);
-	    } // if (subject -> license -> document.URL) is asserted
+	    } // if (subject, license, document.URL) is asserted
 
 	} // for each subject
 
 	// see if more than one matches
 	if (license_subjects.length == 1) {
-	    // only one, we can make an assertion
-	    YAHOO.cc.attribution.add_copy_paste(metadata, license_subjects[0]);
-	}
 
-    }
+	    // only one, we can make an assertion
+	    subject = license_subjects[0];
+
+	} // if only one subject with this license
+
+    } // if the referrer is not licensed under this license
+
+    YAHOO.cc.plus.insert(metadata, subject);
+
+    YAHOO.cc.attribution.add_details(metadata, subject);
+    YAHOO.cc.attribution.add_copy_paste(metadata, subject);
 
 } // success
 
