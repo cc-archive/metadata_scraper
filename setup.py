@@ -30,8 +30,9 @@ setup(
     install_requires = ['setuptools',
                         'rdfadict[tidy]>=0.4.2',
                         'simplejson',
-                        'CherryPy',
-			'zdaemon'
+                        'CherryPy<=3.0.999',
+			'zdaemon',
+                        'decorator',
                         ],
 
     namespace_packages = ['cc'],
