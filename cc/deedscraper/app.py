@@ -25,36 +25,87 @@ import cherrypy
 import simplejson
 import rdfadict
 import urlparse
+import logging
+
+from decorator import decorator
+from support import LOG
 
 if sys.version < (2,5):
     # import set support
     from sets import Set as set
 
-def jsondefault(func):
-    """Decorator which catches any exceptions thrown by [func] and returns
-    an empty JSON mapping ('{}') if [func] does not complete successfully.
-    """
+@decorator
+def json(func, *args, **kwargs):
+
+    return simplejson.dumps(func(*args, **kwargs))
+
+class LogResult(object):
+    """Log the result of a call to a given Logger object."""
+    def __new__(cls, log, level=logging.INFO):
+        self = super(LogResult, cls).__new__(cls)
+        self._log = log
+        self._level = level
     
-    def catch_wrapper(*args, **kwargs):
+        return self
 
-        try:
-            return func(*args, **kwargs)
-        except:
-            return simplejson.dumps({})
+    def call(self, func, *args, **kwargs):
+        result = func(*args, **kwargs)
+        self._log.log(self._level, result)
 
-    return catch_wrapper
+        return result
+
+LogResult = decorator(LogResult)
 
 class DeedScraper(object):
 
-    @cherrypy.expose
-    @jsondefault
-    def scrape(self, url):
+    @LogResult(LOG)
+    def _triples(self, url, action='triples'):
 
         cherrypy.response.headers['Content-Type'] = 'text/plain'
 
         # parse the RDFa from the document
         parser = rdfadict.RdfaParser() 
-        triples = parser.parseurl(url)
+        try:
+            triples = parser.parseurl(url)
+        except Exception, e:
+            triples = {'_exception': str(e)}
+
+        ns_cc = 'http://creativecommons.org/ns#'
+        ns_wr = 'http://web.resource.org/cc/'
+
+        # mash web.resource assertions to cc.org/ns
+        for s in triples.keys():
+
+            if s[:1] == '_': continue
+
+            # walk each predicate, checking if it's in the web.resource ns
+            for p in triples[s].keys():
+
+                if p.find(ns_wr) == 0:
+                    # map this back to cc.org/ns#
+                    triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
+                    del triples[s][p]
+        
+        # get a list of the keys and include it for convenience 
+        subjects = [k for k in triples.keys()[:] if k[:1] != '_']
+        triples['_subjects'] = subjects
+
+        # include source and call information
+        triples['_source'] = url
+        triples['_action'] = action
+
+        gc.collect()
+
+        return triples
+ 
+    @cherrypy.expose
+    @json
+    def scrape(self, url):
+
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+
+        # parse the RDFa from the document
+        triples = self._triples(url, 'scrape')
 
         ns_cc = 'http://creativecommons.org/ns#'
         ns_wr = 'http://web.resource.org/cc/'
@@ -108,7 +159,9 @@ class DeedScraper(object):
                     ns_dc + 'title', [''])[0]
 
         # assemble a dictionary to serialize
-        attribution_info = {'licenseUrl':license_url,
+        attribution_info = {'_action':'scrape',
+                            '_source':url,
+                            'licenseUrl':license_url,
                             'attributionName':attr_name,
                             'attributionUrl':attr_url,
                             'morePermissions':more_perms,
@@ -119,44 +172,19 @@ class DeedScraper(object):
                             }
 
         # return the data encoded as JSON
-        result = "(%s)" % simplejson.dumps(attribution_info)
+        # result = "%s" % simplejson.dumps(attribution_info)
         gc.collect()
 
-        return result
+        return attribution_info
 
     @cherrypy.expose
-    @jsondefault
+    @json
     def triples(self, url):
+        """Return all triples found in the specified page."""
 
         cherrypy.response.headers['Content-Type'] = 'text/plain'
 
-        # parse the RDFa from the document
-        parser = rdfadict.RdfaParser() 
-        triples = parser.parseurl(url)
-
-        ns_cc = 'http://creativecommons.org/ns#'
-        ns_wr = 'http://web.resource.org/cc/'
-
-        # mash web.resource assertions to cc.org/ns
-        for s in triples.keys():
-
-            # walk each predicate, checking if it's in the web.resource ns
-            for p in triples[s].keys():
-
-                if p.find(ns_wr) == 0:
-                    # map this back to cc.org/ns#
-                    triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
-                    del triples[s][p]
-        
-        # get a list of the keys and include it for convenience 
-        subjects = triples.keys()[:]
-        triples['_subjects'] = subjects
-
-        # return the data encoded as JSON
-        result = simplejson.dumps(triples)
-        gc.collect()
-
-        return result
+        return self._triples(url)
 
 if __name__ == '__main__':
 
