@@ -1,4 +1,4 @@
-## Copyright (c) 2007 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2008 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -18,35 +18,11 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-from setuptools import setup, find_packages
+"""Logging support for Metadata Scraper."""
 
-setup(
-    name = "cc.deedscraper",
-    version = "0.2.2",
-    packages = ['cc.deedscraper'],
+import logging
+import logging.config
 
-    # scripts and dependencies
-    dependency_links = ['http://download.zope.org/distribution/'],
-    install_requires = ['setuptools',
-                        'rdfadict[tidy]>=0.4.2',
-                        'simplejson',
-                        'CherryPy<=3.0.999',
-			'zdaemon',
-                        'decorator',
-                        ],
-
-    namespace_packages = ['cc'],
-
-    entry_points = { 'console_scripts':
-                     ['server = cc.deedscraper.server:serve',
-                      ],
-                     },
-
-    # author metadata
-    author = 'Nathan R. Yergler',
-    author_email = 'nathan@creativecommons.org',
-    description = 'Attribution metadata extractor.',
-    license = 'MIT',
-    url = 'http://creativecommons.org/license',
-
-    )
+# configure logging
+logging.config.fileConfig('log.ini')
+LOG = logging.getLogger('cc.deedscraper')
