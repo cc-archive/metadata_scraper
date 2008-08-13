@@ -225,8 +225,9 @@ YAHOO.cc.get_license = function (metadata, subject) {
 
     if (!metadata[subject]) return null;
 
-    var license = metadata[subject]['http://www.w3.org/1999/xhtml#license'] ||
-	metadata[subject]['http://www.w3.org/1999/xhtml#license'] ||
+    var license = 
+        metadata[subject]['http://www.w3.org/1999/xhtml/vocab#license'] ||
+        metadata[subject]['http://purl.org/dc/terms/license'] ||
         metadata[subject]['http://creativecommons.org/ns#license'] || 
         null;
 

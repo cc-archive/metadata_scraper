@@ -1,4 +1,4 @@
-## Copyright (c) 2007 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2007-2008 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -24,23 +24,31 @@ setup(
     name = "cc.deedscraper",
     version = "0.2.2",
     packages = ['cc.deedscraper'],
+    package_dir = {'':'src'},
 
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
-                        'rdfadict[tidy]>=0.4.2',
+                        'rdfadict>=0.5.1',
                         'simplejson',
                         'CherryPy<=3.0.999',
 			'zdaemon',
                         'decorator',
+                        'WebTest',
+                        'nose'
                         ],
 
     namespace_packages = ['cc'],
 
     entry_points = { 'console_scripts':
-                     ['server = cc.deedscraper.server:serve',
-                      ],
+                         ['server = cc.deedscraper.server:serve',
+                          ],
+                     'paste.app_factory':
+                         ['deedscraper=cc.deedscraper.server:app_factory',
+                          ],
                      },
+
+    test_suite = 'nose.collector',
 
     # author metadata
     author = 'Nathan R. Yergler',
