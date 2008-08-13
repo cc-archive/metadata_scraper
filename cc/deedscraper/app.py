@@ -26,6 +26,7 @@ import simplejson
 import rdfadict
 import urlparse
 import logging
+import urllib2
 
 from decorator import decorator
 from support import LOG
@@ -66,7 +67,12 @@ class DeedScraper(object):
         # parse the RDFa from the document
         parser = rdfadict.RdfaParser() 
         try:
-            triples = parser.parseurl(url)
+            opener = urllib2.build_opener()
+            request = urllib2.Request(url)
+            request.add_header('User-Agent',
+                     'CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
+
+            triples = parser.parse_file(opener.open(request), url)
         except Exception, e:
             triples = {'_exception': str(e)}
 
@@ -108,29 +114,22 @@ class DeedScraper(object):
         triples = self._triples(url, 'scrape')
 
         ns_cc = 'http://creativecommons.org/ns#'
-        ns_wr = 'http://web.resource.org/cc/'
-        ns_xh = 'http://www.w3.org/1999/xhtml#'
+        ns_xh = 'http://www.w3.org/1999/xhtml/vocab#'
         ns_dc = 'http://purl.org/dc/elements/1.1/'
 
         # extract the bits we care about
         license_url = triples.setdefault(url, {}).get(
             ns_xh+'license', triples[url].get(
             ns_cc+'license', ['']))[0]
-        #attr_name = triples[url].get(
-        #   ns_cc+'attributionName', [''])[0]
+
         attr_name = triples.setdefault(url, {}).get(
-            ns_cc+'attributionName', triples[url].get(
-            ns_wr+'attributionName', ['']))[0]
-        #attr_url =  triples[url].get(
-        #    ns_cc+'attributionURL', [''])[0]
+            ns_cc+'attributionName', [''])[0]
+
         attr_url = triples.setdefault(url, {}).get(
-            ns_cc+'attributionURL', triples[url].get(
-            ns_wr+'attributionURL', ['']))[0]
-        #more_perms = triples[url].get(
-        #    ns_cc+'morePermissions', [''])[0]
+            ns_cc+'attributionURL', [''])[0]
+
         more_perms = triples.setdefault(url, {}).get(
-            ns_cc+'morePermissions', triples[url].get(
-            ns_wr+'morePermissions', ['']))[0]
+            ns_cc+'morePermissions', [''])[0]
         more_perms_domain = urlparse.urlparse(more_perms)[1]
 
         # allow ads with non-commercial use?
@@ -145,8 +144,7 @@ class DeedScraper(object):
 
         # commerical rights / agent support
         commercial_license = triples.setdefault(url, {}).get(
-            ns_cc+'commercialLicense', triples[url].get(
-            ns_wr+'commercialLicense', ['']))[0]
+            ns_cc+'commercialLicense', [''])[0]
         more_perms_agent = ''
 
         if commercial_license:
@@ -172,9 +170,7 @@ class DeedScraper(object):
                             }
 
         # return the data encoded as JSON
-        # result = "%s" % simplejson.dumps(attribution_info)
         gc.collect()
-
         return attribution_info
 
     @cherrypy.expose
