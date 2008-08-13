@@ -20,9 +20,17 @@
 
 """Logging support for Metadata Scraper."""
 
+import os
 import logging
 import logging.config
 
+__all__ = ['LOG']
+
 # configure logging
-logging.config.fileConfig('log.ini')
+CONF_DIR = os.path.dirname(__file__)
+
+while not os.path.exists(os.path.join(CONF_DIR, 'log.ini')):
+    CONF_DIR = os.path.join(CONF_DIR, '..')
+
+logging.config.fileConfig(os.path.join(CONF_DIR, 'log.ini'))
 LOG = logging.getLogger('cc.deedscraper')
