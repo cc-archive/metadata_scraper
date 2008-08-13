@@ -106,7 +106,7 @@ class DeedScraper(object):
  
     @cherrypy.expose
     @json
-    def scrape(self, url):
+    def scrape(self, url=''):
 
         cherrypy.response.headers['Content-Type'] = 'text/plain'
 
@@ -175,7 +175,7 @@ class DeedScraper(object):
 
     @cherrypy.expose
     @json
-    def triples(self, url):
+    def triples(self, url=''):
         """Return all triples found in the specified page."""
 
         cherrypy.response.headers['Content-Type'] = 'text/plain'
