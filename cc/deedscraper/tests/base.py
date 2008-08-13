@@ -1,4 +1,4 @@
-## Copyright (c) 2007 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2007-2008 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -29,6 +29,33 @@ import cherrypy
 from cherrypy.test import helper
 
 import cc.deedscraper.app
+
+CFGSTR = 'config:'
+_cfgpath = os.path.join(os.getcwd(), 'test.cfg')
+if os.path.exists(_cfgpath):
+    CFGSTR += _cfgpath
+else:
+    CFGSTR += os.path.join(os.getcwd(), '..', 'test.cfg')
+
+
+class TestBase:
+    """Base class of test classes for the CC API. Defines test fixture
+       behavior for creating and destroying webtest.TestApp instance of 
+       the WSGI server."""
+
+    def setUp(self):
+        """Test fixture for nosetests:
+           - sets up the WSGI app server
+           - creates test data generator"""
+        cherrypy.config.update({ 'global' : { 'log.screen' : False, } })
+        self.app = webtest.TestApp(CFGSTR)
+        self.data = TestData()
+
+    def tearDown(self):
+        """Test fixture for nosetests:
+           - tears down the WSGI app server"""
+        cherrypy.engine.exit()
+
 
 def formatted_response(**kwargs):
     """Returns a string which contains *at least* the standard fields returned
