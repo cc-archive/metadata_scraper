@@ -71,8 +71,9 @@ class DeedScraper(object):
             request = urllib2.Request(url)
             request.add_header('User-Agent',
                      'CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
+            contents= opener.open(request).read()
+            triples = parser.parse_string(contents, url)
 
-            triples = parser.parse_file(opener.open(request), url)
         except Exception, e:
             triples = {'_exception': str(e)}
 
