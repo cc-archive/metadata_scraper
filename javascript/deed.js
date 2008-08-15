@@ -247,7 +247,7 @@ YAHOO.cc.success = function (response) {
     var subject = null;
 
     // see if the referrer has metadata and is licensed under this license
-    if ( (metadata.triples.indexOf(referer) > -1) &&
+    if ( (metadata.subjects.indexOf(referer) > -1) &&
          (YAHOO.cc.get_license(metadata.triples, referer) == license_url) ) {
 
 	subject = referer;
@@ -276,7 +276,7 @@ YAHOO.cc.success = function (response) {
 
     } // if the referrer is not licensed under this license
 
-    YAHOO.cc.plus.insert(metadata, subject);
+    YAHOO.cc.plus.insert(metadata.triples, subject);
 
     YAHOO.cc.attribution.add_details(metadata.triples, subject);
     YAHOO.cc.attribution.add_copy_paste(metadata.triples, subject);
