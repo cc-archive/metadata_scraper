@@ -62,7 +62,15 @@ class DeedScraper(object):
     @LogResult(LOG)
     def _triples(self, url, action='triples'):
 
+        # set the content-type
         cherrypy.response.headers['Content-Type'] = 'text/plain'
+
+        # initialize the result
+        result = dict(
+            source = url,
+            action = action,
+            referer = cherrypy.request.headers.get('Referer', '-')
+            )
 
         # parse the RDFa from the document
         parser = rdfadict.RdfaParser() 
@@ -93,17 +101,12 @@ class DeedScraper(object):
                     triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
                     del triples[s][p]
         
-        # get a list of the keys and include it for convenience 
-        subjects = [k for k in triples.keys()[:] if k[:1] != '_']
-        triples['_subjects'] = subjects
-
-        # include source and call information
-        triples['_source'] = url
-        triples['_action'] = action
-
+        # add the triples to the result
+        result['triples'] = triples
+        result['subjects'] = triples.keys()
         gc.collect()
 
-        return triples
+        return result
  
     @cherrypy.expose
     @json
@@ -112,7 +115,7 @@ class DeedScraper(object):
         cherrypy.response.headers['Content-Type'] = 'text/plain'
 
         # parse the RDFa from the document
-        triples = self._triples(url, 'scrape')
+        triples = self._triples(url, 'scrape')['triples']
 
         ns_cc = 'http://creativecommons.org/ns#'
         ns_xh = 'http://www.w3.org/1999/xhtml/vocab#'

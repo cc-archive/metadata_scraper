@@ -1,5 +1,5 @@
 /*
- * attribution.js
+ * deed.js
  * Support for metadata enhanced CC deeds.
  * 
  * copyright 2007-2008, Creative Commons, Nathan R. Yergler
@@ -247,20 +247,21 @@ YAHOO.cc.success = function (response) {
     var subject = null;
 
     // see if the referrer has metadata and is licensed under this license
-    if ( (metadata._subjects.indexOf(referer) > -1) &&
-         (YAHOO.cc.get_license(metadata, referer) == license_url) ) {
+    if ( (metadata.triples.indexOf(referer) > -1) &&
+         (YAHOO.cc.get_license(metadata.triples, referer) == license_url) ) {
 
 	subject = referer;
 
     } else {
 	
-	// more than one subject, look and see if only one points @ this license
+	// no metadata about the referrer; see if we only have one
+	// subject with a license pointing at this page
 	var license_subjects = [];
 
-	for (var i = 0; i < metadata._subjects.length; i++) {
-	    if (YAHOO.cc.get_license(metadata, metadata._subjects[i]) == 
+	for (var i = 0; i < metadata.subjects.length; i++) {
+	    if (YAHOO.cc.get_license(metadata, metadata.subjects[i]) == 
 		license_url) {
-		license_subjects.push(metadata._subjects[i]);
+		license_subjects.push(metadata.subjects[i]);
 	    } // if (subject, license, document.URL) is asserted
 
 	} // for each subject
@@ -277,8 +278,8 @@ YAHOO.cc.success = function (response) {
 
     YAHOO.cc.plus.insert(metadata, subject);
 
-    YAHOO.cc.attribution.add_details(metadata, subject);
-    YAHOO.cc.attribution.add_copy_paste(metadata, subject);
+    YAHOO.cc.attribution.add_details(metadata.triples, subject);
+    YAHOO.cc.attribution.add_copy_paste(metadata.triples, subject);
 
 } // success
 
@@ -297,6 +298,9 @@ YAHOO.cc.load = function () {
 	    failure: YAHOO.cc.failure,
 	    argument: r,
 	};
+
+	// initialize the header to include the Referer
+	YAHOO.util.Connect.initHeader('Referer', document.URL, true);
 
 	var url = '/apps/triples?url=' + encodeURIComponent(r);
 	YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
