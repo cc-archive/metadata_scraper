@@ -296,7 +296,7 @@ YAHOO.cc.load = function () {
 	var callback = {
 	    success: YAHOO.cc.success,
 	    failure: YAHOO.cc.failure,
-	    argument: r,
+	    argument: r
 	};
 
 	// initialize the header to include the Referer
