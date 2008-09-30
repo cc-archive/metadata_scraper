@@ -21,13 +21,13 @@
 import os
 import sys
 import gc
-import simplejson
 import rdfadict
 import urlparse
 import logging
 import urllib2
 
 import web
+import simplejson as json
 
 from decorator import decorator
 from support import LOG
@@ -45,11 +45,6 @@ urls = (
     '/triples', 'Triples',
     '/scrape',  'Scrape',
     )
-
-@decorator
-def json(func, *args, **kwargs):
-
-    return simplejson.dumps(func(*args, **kwargs))
 
 class LogResult(object):
     """Log the result of a call to a given Logger object."""
@@ -133,15 +128,13 @@ class ScrapeRequestHandler(object):
 
 class Triples(ScrapeRequestHandler):
 
-    @json
     def GET(self):
 
         web.header("Content-Type","text/plain")
-        print self._triples(web.input()['url'])
+        print json.dumps(self._triples(web.input()['url']))
 
 class Scrape(ScrapeRequestHandler):
     
-    @json
     def GET(self):
 
         url = web.input()['url']
@@ -207,7 +200,8 @@ class Scrape(ScrapeRequestHandler):
 
         # return the data encoded as JSON
         gc.collect()
-        return attribution_info
+
+        print json.dumps(attribution_info)
 
 
 if __name__ == "__main__": 
