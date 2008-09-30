@@ -21,12 +21,13 @@
 import os
 import sys
 import gc
-import cherrypy
 import simplejson
 import rdfadict
 import urlparse
 import logging
 import urllib2
+
+import web
 
 from decorator import decorator
 from support import LOG
@@ -34,6 +35,16 @@ from support import LOG
 if sys.version < (2,5):
     # import set support
     from sets import Set as set
+
+FOLLOW_PREDICATES = (
+     'http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso',
+     'http://creativecommons.org/ns#commonerProfile',
+     )
+
+urls = (
+    '/triples', 'Triples',
+    '/scrape',  'Scrape',
+    )
 
 @decorator
 def json(func, *args, **kwargs):
@@ -57,33 +68,45 @@ class LogResult(object):
 
 LogResult = decorator(LogResult)
 
-class DeedScraper(object):
+class ScrapeRequestHandler(object):
 
-    @LogResult(LOG)
-    def _triples(self, url, action='triples'):
+    def _load_source(self, url, sink=None):
 
-        # set the content-type
-        cherrypy.response.headers['Content-Type'] = 'text/plain'
-
-        # initialize the result
-        result = dict(
-            source = url,
-            action = action,
-            referer = cherrypy.request.headers.get('Referer', '-')
-            )
-
-        # parse the RDFa from the document
         parser = rdfadict.RdfaParser() 
+
         try:
             opener = urllib2.build_opener()
             request = urllib2.Request(url)
             request.add_header('User-Agent',
                      'CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
             contents= opener.open(request).read()
-            triples = parser.parse_string(contents, url)
+            triples = parser.parse_string(contents, url, sink)
+
+            # look for possible predicates to follow
+            for s in triples.keys():
+                for p in triples[s].keys():
+                    if p in FOLLOW_PREDICATES:
+
+                        self._load_source(triples[s][p], triples)
 
         except Exception, e:
             triples = {'_exception': str(e)}
+
+        return triples
+
+        
+    @LogResult(LOG)
+    def _triples(self, url, action='triples'):
+
+        # initialize the result
+        result = dict(
+            source = url,
+            action = action,
+            referer = web.ctx.environ.get('HTTP_REFERER', '')
+            )
+
+        # parse the RDFa from the document
+        triples = self._load_source(url)
 
         ns_cc = 'http://creativecommons.org/ns#'
         ns_wr = 'http://web.resource.org/cc/'
@@ -100,19 +123,28 @@ class DeedScraper(object):
                     # map this back to cc.org/ns#
                     triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
                     del triples[s][p]
-        
+                    
         # add the triples to the result
         result['triples'] = triples
         result['subjects'] = triples.keys()
         gc.collect()
 
         return result
- 
-    @cherrypy.expose
-    @json
-    def scrape(self, url=''):
 
-        cherrypy.response.headers['Content-Type'] = 'text/plain'
+class Triples(ScrapeRequestHandler):
+
+    @json
+    def GET(self):
+
+        web.header("Content-Type","text/plain")
+        print self._triples(web.input()['url'])
+
+class Scrape(ScrapeRequestHandler):
+    
+    @json
+    def GET(self):
+
+        url = web.input()['url']
 
         # parse the RDFa from the document
         triples = self._triples(url, 'scrape')['triples']
@@ -177,16 +209,6 @@ class DeedScraper(object):
         gc.collect()
         return attribution_info
 
-    @cherrypy.expose
-    @json
-    def triples(self, url=''):
-        """Return all triples found in the specified page."""
 
-        cherrypy.response.headers['Content-Type'] = 'text/plain'
-
-        return self._triples(url)
-
-if __name__ == '__main__':
-
-    import server
-    server.serve()
+if __name__ == "__main__": 
+    web.run(urls, globals())
