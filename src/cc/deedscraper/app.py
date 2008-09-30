@@ -102,7 +102,7 @@ class ScrapeRequestHandler(object):
         result = dict(
             source = url,
             action = action,
-            referer = web.ctx.environ.get('HTTP_REFERER', '')
+            referer = web.ctx.environ.get('HTTP_REFERER', '-')
             )
 
         # parse the RDFa from the document
