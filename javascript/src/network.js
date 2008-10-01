@@ -65,7 +65,7 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 			'<a href="' + owner_url + '">' + owner_name + 
 			'</a> has registered ' +
 			'<a href="' + lookup_uri + '">this work</a> ' + 
-			'at the <nobr><a ref="' + network_url + '">' + 
+			'at the <nobr><a href="' + network_url + '">' + 
 			network_name + '</a></nobr>.';
 
 		    // create the new module to display the alert
