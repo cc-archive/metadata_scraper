@@ -4,6 +4,31 @@
  * 
  */
 
+YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
+    // given a network URI, find the service URI that implements
+    // the work lookup, if available
+
+    // see if any services are defined
+    services = metadata[network]["http://rdfs.org/sioc/services#has_service"];
+    if (services) {
+
+	// see if any service implemented work-lookup
+	for (var i = 0; i < services.length; i++) {
+	    if (metadata[services[i]] &&
+		metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"] &&
+		metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"] == "http://wiki.creativecommons.org/work-lookup")
+
+		return services[i];
+
+	} // for each service
+
+    } // if services were defined
+	
+    // no services, return null
+    return null;
+
+} // lookup_uri
+
 YAHOO.cc.network.process_metadata = function (metadata, subject) {
 
     // see if this metadata contains an owner assertion
@@ -22,12 +47,14 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 		    network_url = metadata[owner_url]['http://rdfs.org/sioc/ns#member_of'][0];
 		    network_name = metadata[network_url]['http://purl.org/dc/terms/title'][0];
 
+		    lookup_uri = YAHOO.cc.network.lookup_uri(metadata, network_url, subject) || subject;
+
 		    var network_text = 	    
 			'<a href="' + owner_url + '">' + owner_name + 
 			'</a> has registered ' +
-			'<a href="http://creativecommons.net/work?uri=$referrer_uri">this work</a>' + 
-			'at the <a ref="' + network_url + '">' + 
-			network_name + '</a>.';
+			'<a href="' + lookup_uri + '">this work</a> ' + 
+			'at the <nobr><a ref="' + network_url + '">' + 
+			network_name + '</a></nobr>.';
 
 		    // create the new module to display the alert
 		    var module = new YAHOO.widget.Module("network", 
