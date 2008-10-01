@@ -41,7 +41,6 @@ setup(
 
     entry_points = { 'console_scripts':
                          ['server = cc.deedscraper.server:serve',
-                          'develop = cc.deedscraper.server:develop',
                           'noop = cc.deedscraper.server:noop',
                           ],
                      'paste.app_factory':
