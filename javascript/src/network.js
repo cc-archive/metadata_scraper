@@ -15,10 +15,22 @@ YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
 	// see if any service implemented work-lookup
 	for (var i = 0; i < services.length; i++) {
 	    if (metadata[services[i]] &&
-		metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"] &&
-		metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"] == "http://wiki.creativecommons.org/work-lookup")
+		metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"]) {
+		// this service defines protocols, see if any match
+		protocols = metadata[services[i]]["http://rdfs.org/sioc/services#service_protocol"];
+		for (var j = 0; j < protocols.length; j++) {
+		    if (protocols[j] == 
+			"http://wiki.creativecommons.org/work-lookup") {
 
-		return services[i];
+			// we have a match
+			if (work_uri)
+			    return services[i] + "?uri=" + work_uri;
+
+			return services[i];
+		    }
+		} // for each protocol
+		
+	    } // if the service asserts protocols
 
 	} // for each service
 
