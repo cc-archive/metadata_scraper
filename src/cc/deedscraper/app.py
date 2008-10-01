@@ -139,13 +139,13 @@ class Triples(ScrapeRequestHandler):
     def GET(self):
 
         web.header("Content-Type","text/plain")
-        print json.dumps(self._triples(web.input()['url']))
+        print json.dumps(self._triples(web.input().get('url','')))
 
 class Scrape(ScrapeRequestHandler):
     
     def GET(self):
 
-        url = web.input()['url']
+        url = web.input().get('url', '')
 
         # parse the RDFa from the document
         triples = self._triples(url, 'scrape')['triples']
