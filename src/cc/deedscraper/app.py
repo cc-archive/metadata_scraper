@@ -38,7 +38,7 @@ if sys.version < (2,5):
 
 FOLLOW_PREDICATES = (
      'http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso',
-     'http://creativecommons.org/ns#commonerProfile',
+     'http://rdfs.org/sioc/ns#has_owner',
      )
 
 urls = (
