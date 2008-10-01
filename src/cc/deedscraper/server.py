@@ -16,40 +16,30 @@
 ## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 ## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-## DEALINGS IN THE SOFTWARE.
+## DEALINGS IN THE SOFTWARE
 
-import os
-import cherrypy
+import web
+import app
 
-def get_localconf():
-    """Return a file-like object which can be read to load the local instance 
-    configuration."""
-
-    return file(os.path.join( os.path.dirname(__file__), 'local.conf' ))
+def develop():
+    web.webapi.internalerror = web.debugerror
+    web.run(app.urls, 
+            dict(Triples = app.Triples,
+                 Scrape = app.Scrape),
+            web.reloader)
 
 def serve():
-    """Run the application using CherryPy's built-in server."""
 
-    from app import DeedScraper
-
-    # load the local configuration
-    cherrypy.config.update( get_localconf() )
-
-    # mount the application
-    cherrypy.tree.mount(DeedScraper())
-
-    # start the cherrypy engine
-    cherrypy.server.quickstart()
-    cherrypy.engine.start()
+    web.run(app.urls, dict(Triples = app.Triples,
+                           Scrape = app.Scrape))
 
 def app_factory(*args):
     """Application factory for use with Python Paste deployments."""
 
-    from app import DeedScraper
-    
-    wsgi_app = cherrypy.Application(DeedScraper(), '/')
+    return web.wsgifunc(web.webpyfunc(
+            app.urls, dict(Triples = app.Triples,
+                           Scrape = app.Scrape))
+                        )
 
-    cherrypy.engine.autoreload_match = None
-    cherrypy.engine.start(blocking=False)
-    
-    return wsgi_app
+def noop():
+    pass

@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "cc.deedscraper",
-    version = "0.2.2",
+    version = "0.3",
     packages = ['cc.deedscraper'],
     package_dir = {'':'src'},
 
@@ -31,8 +31,7 @@ setup(
     install_requires = ['setuptools',
                         'rdfadict>=0.5.2',
                         'simplejson',
-                        'CherryPy<=3.0.999',
-			'zdaemon',
+                        'web.py',
                         'decorator',
                         'WebTest',
                         'nose'
@@ -42,6 +41,7 @@ setup(
 
     entry_points = { 'console_scripts':
                          ['server = cc.deedscraper.server:serve',
+                          'noop = cc.deedscraper.server:noop',
                           ],
                      'paste.app_factory':
                          ['deedscraper=cc.deedscraper.server:app_factory',
