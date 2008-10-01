@@ -65,16 +65,19 @@ LogResult = decorator(LogResult)
 
 class ScrapeRequestHandler(object):
 
-    def _load_source(self, url, sink=None):
+    def _load_source(self, url, subjects=[], sink=None):
 
         parser = rdfadict.RdfaParser() 
 
         try:
+            # load the specified URL and parse the RDFa
             opener = urllib2.build_opener()
             request = urllib2.Request(url)
             request.add_header('User-Agent',
                      'CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
             contents= opener.open(request).read()
+            subjects.append(url)
+
             triples = parser.parse_string(contents, url, sink)
 
             # look for possible predicates to follow
@@ -82,7 +85,12 @@ class ScrapeRequestHandler(object):
                 for p in triples[s].keys():
                     if p in FOLLOW_PREDICATES:
 
-                        self._load_source(triples[s][p], triples)
+                        # for each value of the predicate to follow
+                        for o in triples[s][p]:
+
+                            # follow if we haven't already looked here
+                            if o not in subjects:
+                                self._load_source(o, subjects, triples)
 
         except Exception, e:
             triples = {'_exception': str(e)}
