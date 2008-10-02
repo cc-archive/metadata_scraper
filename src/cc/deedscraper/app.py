@@ -65,9 +65,10 @@ LogResult = decorator(LogResult)
 
 class ScrapeRequestHandler(object):
 
-    def _load_source(self, url, subjects=[], sink=None):
+    def _load_source(self, url, subjects=None, sink=None):
 
         parser = rdfadict.RdfaParser() 
+	if subjects is None: subjects = []
 
         try:
             # load the specified URL and parse the RDFa
@@ -93,7 +94,7 @@ class ScrapeRequestHandler(object):
                                 self._load_source(o, subjects, triples)
 
         except Exception, e:
-            triples = {'_exception': str(e)}
+	    triples = {'_exception': str(e)}
 
         return triples
 
