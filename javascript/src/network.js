@@ -41,6 +41,40 @@ YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
 
 } // lookup_uri
 
+YAHOO.cc.network.show_info = function(metadata, subject, owner) {
+
+    // construct the text to insert
+    owner_name = metadata[owner]['http://rdfs.org/sioc/ns#name'][0];
+    network_url = metadata[owner]['http://rdfs.org/sioc/ns#member_of'][0];
+    network_name = metadata[network_url]['http://purl.org/dc/terms/title'][0];
+
+    lookup_uri = YAHOO.cc.network.lookup_uri(metadata, network_url, subject) || subject;
+
+    var network_text = 	    
+    '<a href="' + owner + '">' + owner_name + 
+    '</a> has registered ' +
+    '<a href="' + lookup_uri + '">this work</a> ' + 
+    'at the <nobr><a href="' + network_url + '">' + 
+    network_name + '</a></nobr>.';
+
+    // create the new module to display the alert
+    var module = new YAHOO.widget.Module("network", {visible:true});
+    module.setBody(network_text);
+    module.render(
+		  YAHOO.util.Dom.getAncestorBy(
+					       YAHOO.util.Dom.get("work-attribution-container"),
+					       function(e) {return true;}));
+    YAHOO.util.Dom.addClass(module.body, "network");
+
+    module.show();
+} // show_info
+
+YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
+
+    return false;
+
+} // match_iriset
+
 YAHOO.cc.network.process_metadata = function (metadata, subject) {
 
     // see if this metadata contains an owner assertion
@@ -53,33 +87,41 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 
             // they own *something* - check if it's the referer
             for (var o=0; o< metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of'].length;o++){
-		if (metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of'][o] == subject) {
-		    // construct the text to insert
-		    owner_name = metadata[owner_url]['http://rdfs.org/sioc/ns#name'][0];
-		    network_url = metadata[owner_url]['http://rdfs.org/sioc/ns#member_of'][0];
-		    network_name = metadata[network_url]['http://purl.org/dc/terms/title'][0];
+		var owned_url = metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of'][o];
+		if (owned_url == subject) {
+		    // Yay!
+		    YAHOO.cc.network.show_info(metadata, owned_url,
+					       owner_url);
 
-		    lookup_uri = YAHOO.cc.network.lookup_uri(metadata, network_url, subject) || subject;
+		    // stop processing
+		    break;
 
-		    var network_text = 	    
-			'<a href="' + owner_url + '">' + owner_name + 
-			'</a> has registered ' +
-			'<a href="' + lookup_uri + '">this work</a> ' + 
-			'at the <nobr><a href="' + network_url + '">' + 
-			network_name + '</a></nobr>.';
+		} // if ownership claims match
+		else {
+		    // no? ok, look for regex assertions
 
-		    // create the new module to display the alert
-		    var module = new YAHOO.widget.Module("network", 
-							 {visible:true});
-		    module.setBody(network_text);
-		    module.render(
-				  YAHOO.util.Dom.getAncestorBy(
-							       YAHOO.util.Dom.get("work-attribution-container"),
-							       function(e) {return true;}));
-		    YAHOO.util.Dom.addClass(module.body, "network");
-		    module.show();
-			break;
-			} // if ownership claims match
+		    if (metadata[owned_url] &&
+			metadata[owned_url]["http://www.w3.org/2007/05/powder#iriset"])
+			{
+			    // this contains an IRI set; see if we match
+			    for (var iri_i = 0; iri_i < ; iri_i++) {
+				var iri_bnode =
+				    metadata[owned_url]["http://www.w3.org/2007/05/powder#iriset"][iri_i];
+				if
+				    (YAHOO.cc.network.match_iriset(metadata,
+								   iri_bnode,
+								   subject))
+			{
+			    YAHOO.cc.network.show_info(metadata,
+						       subject,
+						       owner_url);
+			    alert(owned_url);
+			}
+			    } // for each IRI set
+			}
+
+		} // if regex assertions
+
 	    } // for each ownership claim
 	} // if ownership claims exist
 
