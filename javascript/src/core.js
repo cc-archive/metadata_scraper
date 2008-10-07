@@ -60,7 +60,7 @@ YAHOO.cc.success = function (response) {
 	var license_subjects = [];
 
 	for (var i = 0; i < metadata.subjects.length; i++) {
-	    if (YAHOO.cc.get_license(metadata, metadata.subjects[i]) == 
+	    if (YAHOO.cc.get_license(metadata.triples, metadata.subjects[i]) == 
 		license_url) {
 		license_subjects.push(metadata.subjects[i]);
 	    } // if (subject, license, document.URL) is asserted
