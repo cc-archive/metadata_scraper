@@ -12,6 +12,7 @@ YAHOO.cc.license_uri = function(license_uri) {
     // note that this is a CC-ism, although this only runs in deeds @ CC,
     // so we're fine with that
 
+    if (license_uri == null) license_uri = document.URL;
     if (license_uri.charAt(license_uri.length - 1) == '/') return license_uri;
 
     return license_uri.substring(0, license_uri.lastIndexOf('/') + 1);
