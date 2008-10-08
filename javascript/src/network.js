@@ -44,9 +44,9 @@ YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
 YAHOO.cc.network.show_info = function(metadata, subject, owner) {
 
     // construct the text to insert
-    owner_name = metadata[owner]['http://rdfs.org/sioc/ns#name'][0];
-    network_url = metadata[owner]['http://rdfs.org/sioc/ns#member_of'][0];
-    network_name = metadata[network_url]['http://purl.org/dc/terms/title'][0];
+    owner_name = metadata[owner][SIOC('name')][0];
+    network_url = metadata[owner][SIOC('member_of')][0];
+    network_name = metadata[network_url][DCT('title')][0];
 
     lookup_uri = YAHOO.cc.network.lookup_uri(metadata, network_url, subject) || subject;
 
@@ -78,51 +78,46 @@ YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
 YAHOO.cc.network.process_metadata = function (metadata, subject) {
 
     // see if this metadata contains an owner assertion
-    if (metadata[subject]['http://rdfs.org/sioc/ns#has_owner']) {
+    if (metadata[subject][SIOC('has_owner')]) {
         // it does, see if there's a reciprocal ownership assertion
-        owner_url = metadata[subject]['http://rdfs.org/sioc/ns#has_owner'][0];
+        owner_url = metadata[subject][SIOC('has_owner')][0];
 
         if (metadata[owner_url] &&
-            metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of']) { 
+            metadata[owner_url][SIOC('owner_of')]) { 
 
             // they own *something* - check if it's the referer
-            for (var o=0; o< metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of'].length;o++){
-		var owned_url = metadata[owner_url]['http://rdfs.org/sioc/ns#owner_of'][o];
+            for (var o=0; o< metadata[owner_url][SIOC('owner_of')].length;o++){
+		var owned_url = metadata[owner_url][SIOC('owner_of')][o];
 		if (owned_url == subject) {
 		    // Yay!
 		    YAHOO.cc.network.show_info(metadata, owned_url,
 					       owner_url);
 
 		    // stop processing
-		    break;
+		    return;
 
 		} // if ownership claims match
-		else {
-		    // no? ok, look for regex assertions
+	    } // for each owned URL
 
-		    if (metadata[owned_url] &&
-			metadata[owned_url]["http://www.w3.org/2007/05/powder#iriset"])
-			{
-			    // this contains an IRI set; see if we match
-			    for (var iri_i = 0; iri_i < ; iri_i++) {
-				var iri_bnode =
-				    metadata[owned_url]["http://www.w3.org/2007/05/powder#iriset"][iri_i];
-				if
-				    (YAHOO.cc.network.match_iriset(metadata,
-								   iri_bnode,
-								   subject))
-			{
-			    YAHOO.cc.network.show_info(metadata,
-						       subject,
-						       owner_url);
-			    alert(owned_url);
-			}
-			    } // for each IRI set
-			}
+            // no match yet; second pass to look for matching regexes
+            for (var o=0; o< metadata[owner_url][SIOC('owner_of')].length;o++){
+		var owned_url = metadata[owner_url][SIOC('owner_of')][o];
 
-		} // if regex assertions
+		// see if the owned URL has a license that matches us
+		if (YAHOO.cc.get_license(owned_url) == YAHOO.cc.license_uri(null)) {
+		    // it has the same license; see if it's 
+		    // parent has an iriset
+		    if (metadata[owned_url][SIOC('has_parent')] &&
+			metadata[metadata[owned_url][SIOC('has_parent')][0]][POWDER('iriset')]) {
+			// it has at least one IRI set, see if match...
+			parent_url = metadata[owned_url][SIOC('has_parent')][0];
+			for (p=0; p<metadata[parent_url][POWDER('iriset')].length; p++) {
+			    
+			} // for each iriset
+		    } // if the parent has > 0 irisets
+		} // if the work has the same license as we're viewing
+	    } // for each owned work
 
-	    } // for each ownership claim
 	} // if ownership claims exist
 
     } // if a has_owner claim exists
