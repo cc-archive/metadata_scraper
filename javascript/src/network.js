@@ -71,19 +71,28 @@ YAHOO.cc.network.show_info = function(metadata, subject, owner) {
 
 YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
 
-    // iterate over the IRI regexes
-    for (var r = 0; 
+    var r=0;
+
+    // iterate over the inclusion regexes
+    for (r = 0; 
 	 r < metadata[iri_bnode][POWDER("includeregex")].length; 
 	 r++){
 
-	var regex = metadata[iri_bnode][POWDER("includeregex")][r];
-	// console.log ("checking " + regex);
+	if (!(new RegExp(metadata[iri_bnode][POWDER("includeregex")][r])).
+	    test(subject)) return false;
+									   
+    } // for each include regex
 
-	var R = new RegExp(regex);
-	// console.log (R.test(subject));
 
-	if (!R.test(subject)) return false;
-    } // for each regex
+    // iterate over the exclusion regexes
+    for (r = 0; 
+	 r < metadata[iri_bnode][POWDER("excluderegex")].length; 
+	 r++){
+
+	if ((new RegExp(metadata[iri_bnode][POWDER("excluderegex")][r])).
+	    test(subject)) return false;
+									   
+    } // for each exclude regex
 
     return true;
 
