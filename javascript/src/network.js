@@ -74,6 +74,7 @@ YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
     var r=0;
 
     // iterate over the inclusion regexes
+    if metadata[iri_bnode][POWDER("includeregex")]
     for (r = 0; 
 	 r < metadata[iri_bnode][POWDER("includeregex")].length; 
 	 r++){
@@ -85,6 +86,7 @@ YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
 
 
     // iterate over the exclusion regexes
+    if metadata[iri_bnode][POWDER("excluderegex")]
     for (r = 0; 
 	 r < metadata[iri_bnode][POWDER("excluderegex")].length; 
 	 r++){
