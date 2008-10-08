@@ -71,7 +71,21 @@ YAHOO.cc.network.show_info = function(metadata, subject, owner) {
 
 YAHOO.cc.network.match_iriset = function(metadata, iri_bnode, subject) {
 
-    return false;
+    // iterate over the IRI regexes
+    for (var r = 0; 
+	 r < metadata[iri_bnode][POWDER("includeregex")].length; 
+	 r++){
+
+	var regex = metadata[iri_bnode][POWDER("includeregex")][r];
+	// console.log ("checking " + regex);
+
+	var R = new RegExp(regex);
+	// console.log (R.test(subject));
+
+	if (!R.test(subject)) return false;
+    } // for each regex
+
+    return true;
 
 } // match_iriset
 
@@ -99,19 +113,32 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 		} // if ownership claims match
 	    } // for each owned URL
 
+	    // console.log(YAHOO.cc.license_uri(null));
             // no match yet; second pass to look for matching regexes
             for (var o=0; o< metadata[owner_url][SIOC('owner_of')].length;o++){
 		var owned_url = metadata[owner_url][SIOC('owner_of')][o];
 
+		// console.log('checking if ' + owned_url + ' contains the matching iriset');
+
+		// console.log(YAHOO.cc.get_license(metadata, owned_url));
 		// see if the owned URL has a license that matches us
-		if (YAHOO.cc.get_license(owned_url) == YAHOO.cc.license_uri(null)) {
+		if (YAHOO.cc.get_license(metadata, owned_url) == YAHOO.cc.license_uri(null)) {
+		    // console.log('license matches...');
 		    // it has the same license; see if it's 
 		    // parent has an iriset
 		    if (metadata[owned_url][SIOC('has_parent')] &&
 			metadata[metadata[owned_url][SIOC('has_parent')][0]][POWDER('iriset')]) {
+			// console.log('it has a parent which has an iriset');
 			// it has at least one IRI set, see if match...
 			parent_url = metadata[owned_url][SIOC('has_parent')][0];
 			for (p=0; p<metadata[parent_url][POWDER('iriset')].length; p++) {
+			    var iriset = metadata[parent_url][POWDER('iriset')][p];
+			    if (YAHOO.cc.network.match_iriset(metadata,
+							      iriset,
+							      subject)) {
+				YAHOO.cc.network.show_info(metadata, owned_url, owner_url);
+				return;
+			    }
 			    
 			} // for each iriset
 		    } // if the parent has > 0 irisets
