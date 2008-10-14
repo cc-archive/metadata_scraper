@@ -32,9 +32,7 @@ import simplejson as json
 from decorator import decorator
 from support import LOG
 
-if sys.version < (2,5):
-    # import set support
-    from sets import Set as set
+from rdfadict.sink import DictSetTripleSink
 
 FOLLOW_PREDICATES = (
      'http://www.w3.org/1999/02/22-rdf-syntax-ns#seeAlso',
@@ -79,6 +77,10 @@ class ScrapeRequestHandler(object):
             contents= opener.open(request).read()
             subjects.append(url)
 
+            # default to a set-based triple sink
+            if sink is None:
+                sink = DictSetTripleSink()
+
             triples = parser.parse_string(contents, url, sink)
 
             # look for possible predicates to follow
@@ -112,6 +114,11 @@ class ScrapeRequestHandler(object):
         # parse the RDFa from the document
         triples = self._load_source(url)
 
+        # post-process the Object sets into lists
+        for s in triples.keys():
+            for p in triples[s].keys():
+                triples[s][p] = list(triples[s][p])
+        
         ns_cc = 'http://creativecommons.org/ns#'
         ns_wr = 'http://web.resource.org/cc/'
 
