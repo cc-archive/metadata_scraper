@@ -29,7 +29,7 @@ setup(
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
     install_requires = ['setuptools',
-                        'rdfadict>=0.5.2',
+                        'rdfadict>=0.6',
                         'simplejson',
                         'web.py',
                         'decorator',
