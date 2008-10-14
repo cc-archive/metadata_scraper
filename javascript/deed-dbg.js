@@ -213,12 +213,10 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
             for (var o=0; o< metadata[owner_url][SIOC('owner_of')].length;o++){
 		var owned_url = metadata[owner_url][SIOC('owner_of')][o];
 		if (owned_url == subject) {
+
 		    // Yay!
 		    YAHOO.cc.network.show_info(metadata, owned_url,
 					       owner_url);
-
-		    // stop processing
-		    return;
 
 		} // if ownership claims match
 	    } // for each owned URL
@@ -247,8 +245,7 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 							      iriset,
 							      subject)) {
 				YAHOO.cc.network.show_info(metadata, owned_url, owner_url);
-				return;
-			    }
+			    } // if we match
 			    
 			} // for each iriset
 		    } // if the parent has > 0 irisets
