@@ -9,7 +9,7 @@ YAHOO.cc.campaign.show = function() {
     var header = YAHOO.util.Dom.get("header");
 
     // construct the text to insert
-    var network_text = 'Help Build the Commons &mdash; <a href="http://support.creativecommons.org/">Join Today!</a>';
+    var network_text = 'Help Build the Commons &mdash; <a href="http://support.creativecommons.org/?utm_source=deeds&utm_medium=banner&utm_campaign=fall2008">Join Today!</a>';
 
     // create the new module to display the alert
     var module = new YAHOO.widget.Module("campaign", {visible:false});
