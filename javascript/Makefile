@@ -1,8 +1,9 @@
 
 JS_FILES = src/LICENSE src/namespaces.js src/header.js \
 	src/network.js src/plus.js src/attribution.js \
-	src/campaign.js \
 	src/core.js
+#	src/campaign.js \
+
 
 all: deed-dbg.js deed.js
 
