@@ -21,10 +21,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
 	} 
     } // if a commercial license exists...
 
-
-    if (morePermissionsURL) 
-	morePermissionsURL = addQSParameter(morePermissionsURL, 'cc-referrer', document.referrer);
-
     var more_perms = '';
 
     if (morePermissionsURL.length > 0) {
@@ -35,7 +31,7 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
 
     for (var p=0; p < morePermissionsURL.length; p++) {
 
-	more_perms += " <strong><a href='" + morePermissionsURL[p] + "'>";
+	more_perms += " <strong><a href='" + addQSParameter(morePermissionsURL[p], 'cc-referrer', document.referrer) + "'>";
 	more_perms += parseUri(morePermissionsURL[p])['host'];
 	more_perms += "</a></strong>";
 	
