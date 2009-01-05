@@ -9,7 +9,6 @@
 YAHOO.cc.plus.insert = function(metadata, subject) {
 
     var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'];
-    var morePermissionsDomain = parseUri(morePermissionsURL)['host'];
 
     var commercialLicense = metadata[subject]['http://creativecommons.org/ns#commercialLicense'] || false;
 
@@ -22,19 +21,21 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
 	} 
     } // if a commercial license exists...
 
-    var noncomm_ads = false; 
-
-    if (morePermissionsURL) 
-	morePermissionsURL = addQSParameter(morePermissionsURL, 'cc-referrer', document.referrer);
-
     var more_perms = '';
 
-    if (morePermissionsURL && morePermissionsDomain) {
+    if (morePermissionsURL.length > 0) {
 
-	more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href='";
-	more_perms += morePermissionsURL;
-	more_perms += "'>" + morePermissionsDomain + "</a></strong>.</li>";
+	more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at ";
+
     }
+
+    for (var p=0; p < morePermissionsURL.length; p++) {
+
+	more_perms += " <strong><a href='" + addQSParameter(morePermissionsURL[p], 'cc-referrer', document.referrer) + "'>";
+	more_perms += parseUri(morePermissionsURL[p])['host'];
+	more_perms += "</a></strong>";
+	
+    } // for each more permissions URL
 
     if (commercialLicense && morePermissionsAgent) {
        if (more_perms) more_perms += '<br/>';
@@ -51,11 +52,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
         document.getElementById('more-container').innerHTML = more_perms;
         document.getElementById('more-container').setAttribute("class", "license more");
     } 
-
-    if (document.getElementById('nc-more-container') && noncomm_ads) {
-	// this is a non-comm license
-	document.getElementById('nc-more-container').innerHTML = noncomm_ads;
-    }
 
 } // insert
 
