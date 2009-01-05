@@ -9,7 +9,6 @@
 YAHOO.cc.plus.insert = function(metadata, subject) {
 
     var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'];
-    var morePermissionsDomain = parseUri(morePermissionsURL)['host'];
 
     var commercialLicense = metadata[subject]['http://creativecommons.org/ns#commercialLicense'] || false;
 
@@ -28,12 +27,19 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
 
     var more_perms = '';
 
-    if (morePermissionsURL && morePermissionsDomain) {
+    if (morePermissionsURL.length > 0) {
 
-	more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href='";
-	more_perms += morePermissionsURL;
-	more_perms += "'>" + morePermissionsDomain + "</a></strong>.</li>";
+	more_perms = "<strong>Permissions beyond</strong> the scope of this public license are available at ";
+
     }
+
+    for (var p=0; p < morePermissionsURL.length; p++) {
+
+	more_perms += " <strong><a href='" + morePermissionsURL[p] + "'>";
+	more_perms += parseUri(morePermissionsURL[p])['host'];
+	more_perms += "</a></strong>";
+	
+    } // for each more permissions URL
 
     if (commercialLicense && morePermissionsAgent) {
        if (more_perms) more_perms += '<br/>';
