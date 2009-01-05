@@ -22,7 +22,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
 	} 
     } // if a commercial license exists...
 
-    var noncomm_ads = false; 
 
     if (morePermissionsURL) 
 	morePermissionsURL = addQSParameter(morePermissionsURL, 'cc-referrer', document.referrer);
@@ -51,11 +50,6 @@ YAHOO.cc.plus.insert = function(metadata, subject) {
         document.getElementById('more-container').innerHTML = more_perms;
         document.getElementById('more-container').setAttribute("class", "license more");
     } 
-
-    if (document.getElementById('nc-more-container') && noncomm_ads) {
-	// this is a non-comm license
-	document.getElementById('nc-more-container').innerHTML = noncomm_ads;
-    }
 
 } // insert
 
