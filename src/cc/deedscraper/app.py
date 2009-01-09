@@ -121,6 +121,8 @@ class ScrapeRequestHandler(object):
 
         # post-process the Object sets into lists
         for s in triples.keys():
+            if s[:1] == '_': continue
+
             for p in triples[s].keys():
                 triples[s][p] = list(triples[s][p])
         
