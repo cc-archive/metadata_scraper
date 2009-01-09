@@ -63,7 +63,11 @@ LogResult = decorator(LogResult)
 
 class ScrapeRequestHandler(object):
 
-    def _load_source(self, url, subjects=None, sink=None):
+    def _load_source(self, url, subjects=None, sink=None, depth=2):
+
+        # bail out if we've hit the parsing limit
+        if depth < 0:
+            return sink
 
         parser = rdfadict.RdfaParser() 
 	if subjects is None: subjects = []
@@ -93,7 +97,8 @@ class ScrapeRequestHandler(object):
 
                             # follow if we haven't already looked here
                             if o not in subjects:
-                                self._load_source(o, subjects, triples)
+                                self._load_source(o, subjects, triples,
+                                                  depth - 1)
 
         except Exception, e:
 	    triples = {'_exception': str(e)}
