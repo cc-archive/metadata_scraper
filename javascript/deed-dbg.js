@@ -239,7 +239,7 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 			// console.log('it has a parent which has an iriset');
 			// it has at least one IRI set, see if match...
 			parent_url = metadata[owned_url][SIOC('has_parent')][0];
-			for (p=0; p<metadata[parent_url][POWDER('iriset')].length; p++) {
+			for (var p=0; p<metadata[parent_url][POWDER('iriset')].length; p++) {
 			    var iriset = metadata[parent_url][POWDER('iriset')][p];
 			    if (YAHOO.cc.network.match_iriset(metadata,
 							      iriset,
@@ -268,7 +268,7 @@ YAHOO.cc.network.process_metadata = function (metadata, subject) {
 
 YAHOO.cc.plus.insert = function(metadata, subject) {
 
-    var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'];
+    var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'] || [];
 
     var commercialLicense = metadata[subject]['http://creativecommons.org/ns#commercialLicense'] || false;
 
