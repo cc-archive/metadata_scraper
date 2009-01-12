@@ -8,7 +8,7 @@
 
 YAHOO.cc.plus.insert = function(metadata, subject) {
 
-    var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'];
+    var morePermissionsURL = metadata[subject]['http://creativecommons.org/ns#morePermissions'] || [];
 
     var commercialLicense = metadata[subject]['http://creativecommons.org/ns#commercialLicense'] || false;
 
