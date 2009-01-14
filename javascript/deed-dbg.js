@@ -29,6 +29,10 @@ var SIOC = function(part) {
     return "http://rdfs.org/sioc/ns#" + part;
 } // SIOC
 
+var SIOC_SERVICE = function(part) {
+    return "http://rdfs.org/sioc/services#" + part;
+} // SIOC
+
 var POWDER = function(part) {
     return "http://www.w3.org/2007/05/powder#" + part;
 } // POWDER
@@ -97,6 +101,40 @@ function addQSParameter(url, key, value) {
     return url_nohash + hash;
 } // addQSParameter
 
+
+
+YAHOO.cc.license_uri = function(license_uri) {
+
+    // ensure that the license_uri is canonical
+    // note that this is a CC-ism, although this only runs in deeds @ CC,
+    // so we're fine with that
+
+    if (license_uri == null) license_uri = document.URL;
+    if (license_uri.charAt(license_uri.length - 1) == '/') return license_uri;
+
+    return license_uri.substring(0, license_uri.lastIndexOf('/') + 1);
+
+} // license_uri
+
+YAHOO.cc.get_license = function (metadata, subject) {
+
+    // Return the license URI for the given subject; if no license is
+    // asserted, return null.  This looks for xhtml:license, dc:license,
+    // and cc:license in that order.
+
+    if (!metadata[subject]) return null;
+
+    var license = 
+        metadata[subject]['http://www.w3.org/1999/xhtml/vocab#license'] ||
+        metadata[subject]['http://purl.org/dc/terms/license'] ||
+        metadata[subject]['http://creativecommons.org/ns#license'] || 
+        null;
+
+    if (license) return license[0];
+
+    return null;
+
+} // get_license
 /**
  *
  * CC Network/sioc:has_owner Support
@@ -106,6 +144,9 @@ function addQSParameter(url, key, value) {
 YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
     // given a network URI, find the service URI that implements
     // the work lookup, if available
+
+    // make sure we have metadata for this network
+    if (!metadata[network]) return null;
 
     // see if any services are defined
     services = metadata[network]["http://rdfs.org/sioc/services#has_service"];
@@ -327,6 +368,8 @@ YAHOO.cc.attribution.add_details = function (metadata, subject) {
     var attributionName = metadata[subject]['http://creativecommons.org/ns#attributionName'] || false;
     var attributionUrl = metadata[subject]['http://creativecommons.org/ns#attributionURL'] || false;
 
+    if (attributionName.length > 1 || attributionUrl.length > 1) return;
+
     // Attribution metadata
     if (attributionName && attributionUrl) {
 	document.getElementById('attribution-container').innerHTML = "You must attribute this work to <strong><a href='" + attributionUrl + "'>" + attributionName + "</a></strong> (with link)."; 
@@ -338,6 +381,9 @@ YAHOO.cc.attribution.add_copy_paste = function (metadata, subject) {
 
     var attributionName = metadata[subject]['http://creativecommons.org/ns#attributionName'] || false;
     var attributionUrl = metadata[subject]['http://creativecommons.org/ns#attributionURL'] || false;
+
+    if (attributionName.length > 1 || attributionUrl.length > 1) return;
+
 
     var licenseCode = document.getElementById('license-code').value;
     var licenseUrl = document.getElementById('license-url').value;
@@ -375,39 +421,6 @@ YAHOO.cc.attribution.add_copy_paste = function (metadata, subject) {
 // ** 
 // **  Parsing/Scraping/Dispatch
 // **
-
-YAHOO.cc.license_uri = function(license_uri) {
-
-    // ensure that the license_uri is canonical
-    // note that this is a CC-ism, although this only runs in deeds @ CC,
-    // so we're fine with that
-
-    if (license_uri == null) license_uri = document.URL;
-    if (license_uri.charAt(license_uri.length - 1) == '/') return license_uri;
-
-    return license_uri.substring(0, license_uri.lastIndexOf('/') + 1);
-
-} // license_uri
-
-YAHOO.cc.get_license = function (metadata, subject) {
-
-    // Return the license URI for the given subject; if no license is
-    // asserted, return null.  This looks for xhtml:license, dc:license,
-    // and cc:license in that order.
-
-    if (!metadata[subject]) return null;
-
-    var license = 
-        metadata[subject]['http://www.w3.org/1999/xhtml/vocab#license'] ||
-        metadata[subject]['http://purl.org/dc/terms/license'] ||
-        metadata[subject]['http://creativecommons.org/ns#license'] || 
-        null;
-
-    if (license) return license[0];
-
-    return null;
-
-} // get_license
 
 YAHOO.cc.success = function (response) {
 
