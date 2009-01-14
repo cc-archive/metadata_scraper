@@ -8,6 +8,9 @@ YAHOO.cc.network.lookup_uri = function (metadata, network, work_uri) {
     // given a network URI, find the service URI that implements
     // the work lookup, if available
 
+    // make sure we have metadata for this network
+    if (!metadata[network]) return null;
+
     // see if any services are defined
     services = metadata[network]["http://rdfs.org/sioc/services#has_service"];
     if (services) {
