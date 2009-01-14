@@ -1,0 +1,96 @@
+<html>
+
+  <head>
+
+    <!-- YUI Test -->
+    <!--CSS-->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/logger/assets/skins/sam/logger.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/yuitest/assets/skins/sam/yuitest.css" />
+<link rel="stylesheet" type="text/css"
+      href="http://yui.yahooapis.com/2.6.0/build/button/assets/skins/sam/button.css"> 
+<link rel="stylesheet" type="text/css" href="./testing.css" />
+    
+    <!-- Dependencies --> 
+    <script type="text/javascript" 
+	    src="http://yui.yahooapis.com/2.6.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript"
+	    src="http://yui.yahooapis.com/2.6.0/build/element/element-beta-min.js"></script> 
+    <script type="text/javascript" 
+	    src="http://yui.yahooapis.com/2.6.0/build/logger/logger-min.js"></script>
+    <script type="text/javascript"
+	    src="http://yui.yahooapis.com/2.6.0/build/button/button-min.js"></script>
+    <script type="text/javascript"
+	src="http://yui.yahooapis.com/2.6.0/build/container/container-min.js"></script> 
+
+    <!-- Source File -->
+    <script type="text/javascript"
+	    src="http://yui.yahooapis.com/2.6.0/build/yuitest/yuitest-min.js"></script>
+    <!-- /YUI Test -->
+
+    <!-- Support Files -->
+    <script type="text/javascript"
+	    src="../src/header.js">
+    </script>
+    <script type="text/javascript"
+	    src="../src/namespaces.js">
+    </script>
+    <script type="text/javascript" src="./test-support.js">
+    </script>
+
+    <!-- Test Target -->
+    <script type="text/javascript"
+	    src="../src/network.js">
+    </script>
+
+    <!-- Test Inclusion -->
+    <script type="text/javascript"
+	    src="./network.js">
+    </script>
+
+    <script type="text/javascript">
+
+YAHOO.cc.test.run = function(e) {
+
+    YAHOO.util.Event.preventDefault(e);
+
+    // run the tests
+    YAHOO.tool.TestRunner.add(YAHOO.cc.test.suite);
+    YAHOO.tool.TestRunner.run();
+
+
+}
+
+YAHOO.util.Event.onDOMReady(function (){
+
+    // create the logger
+    var logger = new YAHOO.tool.TestLogger("testLogger");
+
+    // configure the Run button
+    var runButton = new YAHOO.widget.Button("runTests");
+    //runButton.render();
+
+    runButton.addListener("click", YAHOO.cc.test.run);
+});
+
+</script>
+
+    <title>test: network.js</h1>
+  </head>
+
+  <body class="yui-skin-sam">
+    <h1>network.js</h1>
+
+    <a href="#" id="runTests">Run Tests</a>
+
+    <div id="testLogger"></div>
+
+    <!-- Bogus Structure for Target Code -->
+    <div id="container">
+      <div id="work-attribution-container">
+      </div>
+    </div>
+    
+  </body>
+
+</html>
