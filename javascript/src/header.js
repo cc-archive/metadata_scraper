@@ -58,3 +58,37 @@ function addQSParameter(url, key, value) {
     return url_nohash + hash;
 } // addQSParameter
 
+
+
+YAHOO.cc.license_uri = function(license_uri) {
+
+    // ensure that the license_uri is canonical
+    // note that this is a CC-ism, although this only runs in deeds @ CC,
+    // so we're fine with that
+
+    if (license_uri == null) license_uri = document.URL;
+    if (license_uri.charAt(license_uri.length - 1) == '/') return license_uri;
+
+    return license_uri.substring(0, license_uri.lastIndexOf('/') + 1);
+
+} // license_uri
+
+YAHOO.cc.get_license = function (metadata, subject) {
+
+    // Return the license URI for the given subject; if no license is
+    // asserted, return null.  This looks for xhtml:license, dc:license,
+    // and cc:license in that order.
+
+    if (!metadata[subject]) return null;
+
+    var license = 
+        metadata[subject]['http://www.w3.org/1999/xhtml/vocab#license'] ||
+        metadata[subject]['http://purl.org/dc/terms/license'] ||
+        metadata[subject]['http://creativecommons.org/ns#license'] || 
+        null;
+
+    if (license) return license[0];
+
+    return null;
+
+} // get_license
