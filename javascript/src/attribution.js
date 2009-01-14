@@ -10,6 +10,8 @@ YAHOO.cc.attribution.add_details = function (metadata, subject) {
     var attributionName = metadata[subject]['http://creativecommons.org/ns#attributionName'] || false;
     var attributionUrl = metadata[subject]['http://creativecommons.org/ns#attributionURL'] || false;
 
+    if (attributionName.length > 1 || attributionUrl.length > 1) return;
+
     // Attribution metadata
     if (attributionName && attributionUrl) {
 	document.getElementById('attribution-container').innerHTML = "You must attribute this work to <strong><a href='" + attributionUrl + "'>" + attributionName + "</a></strong> (with link)."; 
@@ -21,6 +23,9 @@ YAHOO.cc.attribution.add_copy_paste = function (metadata, subject) {
 
     var attributionName = metadata[subject]['http://creativecommons.org/ns#attributionName'] || false;
     var attributionUrl = metadata[subject]['http://creativecommons.org/ns#attributionURL'] || false;
+
+    if (attributionName.length > 1 || attributionUrl.length > 1) return;
+
 
     var licenseCode = document.getElementById('license-code').value;
     var licenseUrl = document.getElementById('license-url').value;
