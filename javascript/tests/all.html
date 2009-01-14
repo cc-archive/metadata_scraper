@@ -20,6 +20,8 @@
 	    src="http://yui.yahooapis.com/2.6.0/build/logger/logger-min.js"></script>
     <script type="text/javascript"
 	    src="http://yui.yahooapis.com/2.6.0/build/button/button-min.js"></script>
+    <script type="text/javascript"
+	src="http://yui.yahooapis.com/2.6.0/build/container/container-min.js"></script> 
 
     <!-- Source File -->
     <script type="text/javascript"
@@ -29,6 +31,9 @@
     <!-- Support Files -->
     <script type="text/javascript"
 	    src="../src/header.js">
+    </script>
+    <script type="text/javascript"
+	    src="../src/namespaces.js">
     </script>
     <script type="text/javascript" src="./test-support.js">
     </script>
@@ -43,6 +48,9 @@
     <script type="text/javascript"
 	    src="../src/campaign.js">
     </script>
+    <script type="text/javascript"
+	    src="../src/network.js">
+    </script>
 
     <!-- Test Inclusion -->
     <script type="text/javascript"
@@ -53,6 +61,10 @@
     </script>
     <script type="text/javascript"
 	    src="./campaign.js">
+    </script>
+
+    <script type="text/javascript"
+	    src="./network.js">
     </script>
 
     <script type="text/javascript">
@@ -94,6 +106,14 @@ YAHOO.util.Event.onDOMReady(function (){
     <!-- Bogus Structure for Target Code -->
     <div id="header">header container</div>
     <div id="more-container"></div>
+    <div id="license-code">license-code</div>
+    <div id="license-url">http://example.org/licenses/by/3.0/</div>
+    <div id="attribution-container">[test content]</div>
+    <div id="container">
+      <div id="work-attribution-container">
+	<input id="work-attribution"/>
+      </div>
+    </div>
 
   </body>
 
