@@ -32,8 +32,6 @@
     <script type="text/javascript"
 	    src="../src/header.js">
     </script>
-    <script type="text/javascript" src="./test-support.js">
-    </script>
 
     <!-- Test Target -->
     <script type="text/javascript"
@@ -41,42 +39,19 @@
     </script>
 
     <!-- Test Inclusion -->
+    <script type="text/javascript" src="./test-support.js">
+    </script>
     <script type="text/javascript"
 	    src="./campaign.js">
     </script>
-
-    <script type="text/javascript">
-
-YAHOO.cc.test.run = function(e) {
-
-    YAHOO.util.Event.preventDefault(e);
-
-    // run the tests
-    YAHOO.tool.TestRunner.add(YAHOO.cc.test.suite);
-    YAHOO.tool.TestRunner.run();
-
-
-}
-
-YAHOO.util.Event.onDOMReady(function (){
-
-    // create the logger
-    var logger = new YAHOO.tool.TestLogger("testLogger");
-
-    // configure the Run button
-    var runButton = new YAHOO.widget.Button("runTests");
-    //runButton.render();
-
-    runButton.addListener("click", YAHOO.cc.test.run);
-});
-
-</script>
 
     <title>test: campaign.js</h1>
   </head>
 
   <body class="yui-skin-sam">
     <h1>campaign.js</h1>
+
+    <div id="status" class="passed"></div>
 
     <a href="#" id="runTests">Run Tests</a>
 

@@ -3,3 +3,18 @@
     height:40em;
 
 }
+
+#status {
+
+    width: 5em;
+    height: 5em;
+    border: 1px solid #000;
+}
+
+.passed {
+    background-color: green;
+}
+
+.failed {
+    background-color: red;
+}

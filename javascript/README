@@ -1,0 +1,53 @@
+==================
+CC Deed Javascript
+==================
+
+
+:Author: Nathan R. Yergler <nathan@creativecommons.org>
+:Organization: `Creative Commons <http://creativecommons.org>`_
+:Copyright: 
+   2006-2009, Nathan R. Yergler, Creative Commons; 
+   licensed to the public under the `MIT license 
+   <http://opensource.org/licenses/mit-license.php>`_.
+
+.. contents::
+
+
+This package contains the Javascript application that enables the
+Creative Commons license deeds to dynamically display information
+regarding attribution, CC+ and CC Network.
+
+Building
+********
+
+The Javascript delivered to end users in compressed and minified using
+the `YUI Compressor <http://developer.yahoo.com/yui/compressor/>`_.  A
+copy is included in the ``./lib`` directory.  The source files are
+located in the ``./src`` directory.  To regenerate the combined
+Javascript run::
+
+
+    $ make all
+
+This will construct ``deed.js`` and ``deed-dbg.js``, a combined,
+non-minified version of the file.  The individual files may be
+regenerated using the respective, cunningly named make targets
+``deed.js`` and ``deed-dbg.js``.  For example::
+
+    $ make deed.js
+
+
+Testing
+*******
+
+CC Deed Javascript uses the `YUI Test
+<http://developer.yahoo.com/yui/yuitest/>`_ framework to manage unit
+and functional tests.  You can run the tests by opening
+``./tests/index.html`` in your browser.  To run tests for a particular
+functional area, click the name, or select *all* to run all tests.
+
+When viewing a test page, a green square appears at the top of the
+page.  The tests may be initiated by clicking *Run Tests*.  If the box
+remains green, all tests passed.  If a test fails, the box will turn
+red and you can check the console for the specific error message.
+
