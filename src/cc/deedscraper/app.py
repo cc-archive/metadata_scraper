@@ -1,4 +1,4 @@
-## Copyright (c) 2006 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2006-2009 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -46,22 +46,14 @@ urls = (
     '/scrape',  'Scrape',
     )
 
-class LogResult(object):
-    """Log the result of a call to a given Logger object."""
-    def __new__(cls, log, level=logging.INFO):
-        self = super(LogResult, cls).__new__(cls)
-        self._log = log
-        self._level = level
-    
-        return self
-
-    def call(self, func, *args, **kwargs):
-        result = func(*args, **kwargs)
-        self._log.log(self._level, result)
+def LogResult(log, level=logging.INFO):
+    def _logging(f, *args, **kw):
+        result = f(*args, **kw)
+        log.log(level, result)
 
         return result
 
-LogResult = decorator(LogResult)
+    return decorator(_logging)
 
 class ScrapeRequestHandler(object):
 
@@ -145,7 +137,7 @@ class Triples(ScrapeRequestHandler):
     def GET(self):
 
         web.header("Content-Type","text/plain")
-        print json.dumps(self._triples(web.input().get('url','')))
+        return json.dumps(self._triples(web.input().get('url','')))
 
 class Scrape(ScrapeRequestHandler):
     
@@ -215,8 +207,11 @@ class Scrape(ScrapeRequestHandler):
         # return the data encoded as JSON
         gc.collect()
 
-        print json.dumps(attribution_info)
+        return json.dumps(attribution_info)
 
-
+application = web.application(urls,
+            dict(Triples = Triples,
+                 Scrape = Scrape))
+                              
 if __name__ == "__main__": 
-    web.run(urls, globals())
+    application.run()
