@@ -1,4 +1,4 @@
-## Copyright (c) 2006 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2006-2009 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -23,23 +23,24 @@ import app
 
 def develop():
     web.webapi.internalerror = web.debugerror
-    web.run(app.urls, 
-            dict(Triples = app.Triples,
-                 Scrape = app.Scrape),
-            web.reloader)
+
+    app.application.run(web.reloader)
 
 def serve():
 
-    web.run(app.urls, dict(Triples = app.Triples,
-                           Scrape = app.Scrape))
+    app.application.run()
 
 def app_factory(*args):
     """Application factory for use with Python Paste deployments."""
 
-    return web.wsgifunc(web.webpyfunc(
-            app.urls, dict(Triples = app.Triples,
-                           Scrape = app.Scrape))
-                        )
+    # web.application (app.application) is a WSGI object now
+    return app.application
+
+def fcgi():
+    """Spawn an FCGI listening interface."""
+
+    web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
+    app.application.run()
 
 def noop():
     pass
