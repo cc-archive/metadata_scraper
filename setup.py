@@ -23,7 +23,9 @@ from setuptools import setup, find_packages
 setup(
     name = "cc.deedscraper",
     version = "0.3",
+
     packages = ['cc.deedscraper'],
+    namespace_packages = ['cc'],
     package_dir = {'':'src'},
 
     # scripts and dependencies
@@ -36,12 +38,14 @@ setup(
                         'WebTest',
                         'nose'
                         ],
-
-    namespace_packages = ['cc'],
+    extras_require = {
+        'fcgi': ['flup'],
+        },
 
     entry_points = { 'console_scripts':
                          ['server = cc.deedscraper.server:serve',
                           'noop = cc.deedscraper.server:noop',
+                          'scraper.fcgi = cc.deedscraper.server:fcgi',
                           ],
                      'paste.app_factory':
                          ['deedscraper=cc.deedscraper.server:app_factory',
