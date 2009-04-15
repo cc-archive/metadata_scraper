@@ -34,7 +34,7 @@ def app_factory(*args):
     """Application factory for use with Python Paste deployments."""
 
     # web.application (app.application) is a WSGI object now
-    return app.application
+    return app.application.wsgifunc()
 
 def fcgi():
     """Spawn an FCGI listening interface."""
