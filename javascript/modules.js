@@ -5,7 +5,7 @@ YAHOO.cc.modules.add_definitions = function(loader, basePath) {
 
     loader.addModule({name: "cc.ld",
 		type: "js",
-		fullpath: "http://mirrors.creativecommons.org/ld/ld.js" 
+		fullpath: "http://mirrors.creativecommons.org/software/ld/ld.js" 
 		});
 
 } // add_definitions
