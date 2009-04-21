@@ -47,20 +47,18 @@ YAHOO.cc.ld.define_modules = function (loader) {
 
 	// create the store and add the RDF assertions
 	store = new RDFStore();
-	//console.log(metadata);
+
 
 	for (var s_idx in metadata.subjects) {
 	    s = metadata.subjects[s_idx];
 	    for (var p in metadata.triples[s]) {
 		for (var o_idx in metadata.triples[s][p]) {
 		    o = metadata.triples[s][p][o_idx];
-		    //console.log(s,p,o);
 		    store.add(null, s, p, o, false, null);
 		}
 	    }
 	}
 
-	console.log(store.getGraph);
 	response.argument.success(store);
 
     } // cc.ld.request_success
@@ -88,9 +86,6 @@ YAHOO.cc.ld.request_failure = function (o) {
 
 	var url = proxy_path + '?url=' + encodeURIComponent(url);
 	YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
-
-	console.log(url);
-	parse_callback.success(url);
 
     } // load
 
