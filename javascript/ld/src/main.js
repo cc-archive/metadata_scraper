@@ -89,29 +89,12 @@ YAHOO.cc.ld.request_failure = function (o) {
 
     } // load
 
-	YAHOO.cc.ld.finish_init = function() {
+YAHOO.cc.ld.finish_init = function() {
 
-	    // we've loaded our dependencies, register the module
-	    YAHOO.register("cc.ld", YAHOO.cc.ld, {version:'0.1', build:'001'});
-	}
+    // we've loaded our dependencies, register the module
+    YAHOO.register("cc.ld", YAHOO.cc.ld, {version:'0.1', build:'001'});
+}
 
-(
- function() {
-
-     // load dependencies and initialize MTA handling
-     loader = new YAHOO.util.YUILoader({onSuccess:YAHOO.cc.ld.finish_init});
-     basePath = pathToModule("ld");
-     YAHOO.cc.ld.define_modules(loader);
-
-     loader.require("json");
-     loader.require("connection");
-     loader.require("ubiquity-rdfquery");
-     loader.require("ubiquity-rdfstore");
-     loader.require("ubiquity-rdfparser");
-     
-     loader.insert();
-
- }()
-); // init
+YAHOO.cc.ld.finish_init();
 
 

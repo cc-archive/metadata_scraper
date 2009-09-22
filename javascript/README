@@ -37,6 +37,30 @@ regenerated using the respective, cunningly named make targets
     $ make deed.js
 
 
+ld.js
+*****
+
+``ld.js`` is a set of shared code based on Web Backplane's `Ubiquity
+RDFa <http://code.google.com/p/ubiquity-rdfa>`_ project.  ``ld.js``
+provides an RDF Store, RDF Graph and RDF Query object with support for
+`jSPARQL
+<http://code.google.com/p/ubiquity-rdfa/wiki/TutorialUsingJsparql>`_.
+Its primary function is providing a bridge between application
+specific code (such as mta.js) and the server side proxy.  There is
+barely enough original code there to have it live on its own.  Barely.
+
+Using ld.js
+-----------
+
+Running ``make`` will generate ``ld.js`` and ``ld-dbg.js``.
+
+``ld.js`` relies on the following YUI dependencies and expects them to
+be loaded before it is loaded:
+
+* yahoo-dom-event
+* connection-core
+* json
+
 Testing
 *******
 
