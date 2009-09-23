@@ -11,31 +11,16 @@ YAHOO.cc.deed.DEED_INFO =  {
 	  [
 	      { pattern: [ "?work",
 			   "http://creativecommons.org/ns#attributionName", 
-			   "?attributionName" ] }
-	  ],
-	  optional: true
-	},
-	{ where:
-	  [
+			   "?attributionName" ], optional: true },
 	      { pattern: [ "?work",
 			   "http://creativecommons.org/ns#attributionURL", 
-			   "?attributionURL" ] }
-	  ],
-	  optional: true
-	},
-	{ where:
-	  [
+			   "?attributionURL" ], optional: true },
 	      { pattern: [ "?work",
 			   "http://purl.org/dc/elements/1.1/title", 
-			   "?title" ] }
-	  ],
-	  optional: true
-	},
-	{ where:
-	  [
+			   "?title" ], optional: true },
 	      { pattern: [ "?work",
 			   "http://purl.org/dc/terms/title", 
-			   "?title" ] }
+			   "?title" ], optional: true }
 	  ],
 	  optional: true
 	},
