@@ -1,14 +1,22 @@
 YAHOO.namespace("cc.deed");
 
-
 YAHOO.cc.deed.parse_success = function(store) {
 
     // make sure the referrer has metadata about this document
     var query = new RDFQuery(store);
     var results = query.query2(YAHOO.cc.deed.DEED_INFO);
 
+    // XXX we need to check and prefer the referrer in the result set.
     query.walk2(results, {
 	    action : function (obj) {
+
+		// attribution
+		YAHOO.cc.attribution.add_details(obj);
+		YAHOO.cc.attribution.add_copy_paste(obj);
+
+		// CC+
+
+		// Registration (CC Network)
 
 		console.log(obj);
 	    }
