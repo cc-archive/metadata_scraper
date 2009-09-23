@@ -1,5 +1,7 @@
 YAHOO.cc.deed.DEED_INFO =  {
-    select: [ "work", "morePermissions", "attributionName", "attributionURL", "title" ],
+    select: [ "work", "attributionName", "attributionURL", "title",
+	      "morePermissions", "commercialLicense", "morePermissionsAgent"
+	    ],
     where:
     [
 	{ pattern: [ "?work", 
@@ -30,7 +32,21 @@ YAHOO.cc.deed.DEED_INFO =  {
 	  [
 	      { pattern: [ "?work",
 			   "http://creativecommons.org/ns#morePermissions", 
-			   "?morePermissions" ] }
+			   "?morePermissions" ], optional: true },
+	  ],
+	  optional: true
+	},
+	{ where:
+	  [
+	      { pattern: [ "?work",
+			   "http://creativecommons.org/ns#commercialLicense", 
+			   "?commercialLicense" ] },
+	      { pattern: [ "?commercialLicense",
+			   "http://purl.org/dc/elements/1.1/publisher",
+			   "?commercialPublisher" ] },
+	      { pattern: [ "?commercialPublisher",
+			   "http://purl.org/dc/elements/1.1/title",
+			   "?morePermissionsAgent" ] }
 	  ],
 	  optional: true
 	}
