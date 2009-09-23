@@ -13,15 +13,14 @@ LD_FILES = ld/src/ubiquity-rdfa/lib/RDFGraph.js \
 	ld/src/blank_line.js \
 	ld/src/main.js
 
-all: deed-dbg.js deed.js ld.js
+all: deed-dbg.js deed.js ld-min.js
 
-ld.js: ld-dbg.js
-	java -jar $(YUI_COMPRESS_JAR) ld-dbg.js > ld.js
+ld-min.js: ld.js
+	java -jar $(YUI_COMPRESS_JAR) ld.js > ld-min.js
 
-ld-dbg.js: $(LD_FILES)
-	cat $(LD_FILES) > ld-dbg.js
-	cat ld-dbg.js | grep -v debugger > ld-dbg.js
-	cat src/bootstrap.js ld/src/bootstrap.js > ld-bootstrap.js
+ld.js: $(LD_FILES)
+	cat $(LD_FILES) > ld.js
+	cat ld.js | grep -v debugger > ld.js
 
 deed-dbg.js: $(JS_FILES)
 	cat $(JS_FILES) > deed-dbg.js
