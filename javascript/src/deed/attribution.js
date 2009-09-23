@@ -8,8 +8,7 @@ YAHOO.namespace("cc.attribution");
 
 YAHOO.cc.attribution.add_details = function (work_info) {
 
-    if (work_info.attributionName.length > 1 || 
-	work_info.attributionURL.length > 1) return;
+    // XXX need to check for multiple results here
 
     // Attribution metadata
     if (work_info.attributionName && work_info.attributionURL) {
@@ -21,9 +20,7 @@ YAHOO.cc.attribution.add_details = function (work_info) {
 
 YAHOO.cc.attribution.add_copy_paste = function (work_info) {
 
-    if (work_info.attributionName.length > 1 || 
-	work_info.attributionURL.length > 1) return;
-
+    // XXX need to check for multiple results here
 
     var licenseCode = document.getElementById('license-code').value;
     var licenseUrl = document.getElementById('license-url').value;
@@ -32,17 +29,17 @@ YAHOO.cc.attribution.add_copy_paste = function (work_info) {
     // Attribution metadata
     if (work_info.attributionName && work_info.attributionURL) {
 
-	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + subject + '"><a rel="cc:attributionURL" property="cc:work_info.attributionName" href="' + work_info.attributionURL + '">' + work_info.attributionName + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + work_info.work + '"><a rel="cc:attributionURL" property="cc:work_info.attributionName" href="' + work_info.attributionURL + '">' + work_info.attributionName + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
 
     } else if (work_info.attributionName) {
 	// name only 
 
-	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + subject + '"><span property="cc:work_info.attributionName">' + work_info.attributionName + '</span> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + work_info.work + '"><span property="cc:work_info.attributionName">' + work_info.attributionName + '</span> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
 	
     } else if (work_info.attributionURL) {
 	// URL only
 
-	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + subject + '"><a rel="cc:attributionURL" href="' + work_info.attributionURL + '">' + work_info.attributionURL + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
+	copyPasteAttrib = '<div xmlns:cc="http://creativecommons.org/ns#" about="' + work_info.work + '"><a rel="cc:attributionURL" href="' + work_info.attributionURL + '">' + work_info.attributionURL + '</a> / <a rel="license" href="' + licenseUrl + '">' + licenseCode + '</a></div>';
 
     }
 
