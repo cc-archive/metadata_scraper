@@ -13,14 +13,8 @@ LD_FILES = src/ubiquity-rdfa/lib/RDFGraph.js \
 	src/blank_line.js \
 	src/ld/main.js
 
-DEED_FILES = src/ubiquity-rdfa/lib/RDFGraph.js \
-	src/blank_line.js \
-	src/ubiquity-rdfa/lib/RDFStore.js \
-	src/blank_line.js \
-	src/ubiquity-rdfa/lib/RDFQuery.js \
-	src/blank_line.js \
-	src/deed/queries.js \
-	src/deed/main.js
+DEED_FILES = src/deed/main.js \
+	src/deed/queries.js
 
 all: deed-dbg.js deed.js ld-min.js deed-sparql.js deed-sparql-min.js
 
