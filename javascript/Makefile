@@ -13,7 +13,16 @@ LD_FILES = src/ubiquity-rdfa/lib/RDFGraph.js \
 	src/blank_line.js \
 	src/ld/main.js
 
-all: deed-dbg.js deed.js ld-min.js
+DEED_FILES = src/ubiquity-rdfa/lib/RDFGraph.js \
+	src/blank_line.js \
+	src/ubiquity-rdfa/lib/RDFStore.js \
+	src/blank_line.js \
+	src/ubiquity-rdfa/lib/RDFQuery.js \
+	src/blank_line.js \
+	src/deed/queries.js \
+	src/deed/main.js
+
+all: deed-dbg.js deed.js ld-min.js deed-sparql.js deed-sparql-min.js
 
 ld-min.js: ld.js
 	java -jar $(YUI_COMPRESS_JAR) ld.js > ld-min.js
@@ -22,6 +31,14 @@ ld.js: $(LD_FILES)
 	cat $(LD_FILES) > ld.js.tmp
 	cat ld.js.tmp | grep -v debugger > ld.js
 	rm ld.js.tmp
+
+deed-sparql-min.js: deed-sparql.js
+	java -jar $(YUI_COMPRESS_JAR) deed-sparql.js > deed-sparql-min.js
+
+deed-sparql.js: $(DEED_FILES)
+	cat $(DEED_FILES) > deed-sparql.js.tmp
+	cat deed-sparql.js.tmp | grep -v debugger > deed-sparql.js
+	rm deed-sparql.js.tmp
 
 deed-dbg.js: $(JS_FILES)
 	cat $(JS_FILES) > deed-dbg.js
@@ -33,4 +50,4 @@ verbose: deed-dbg.js
 	java -jar $(YUI_COMPRESS_JAR) -v deed-dbg.js > deed.js
 
 clean:
-	rm deed.js deed-dbg.js ld.js ld-min.js 
+	rm deed.js deed-dbg.js ld.js ld-min.js deed-sparql.js deed-sparql-min.js
