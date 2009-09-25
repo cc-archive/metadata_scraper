@@ -216,6 +216,7 @@ class Scrape(ScrapeRequestHandler):
         # return the data encoded as JSON
         gc.collect()
 
+        web.header("Content-Type","text/plain")
         return json.dumps(attribution_info)
 
 application = web.application(urls,
