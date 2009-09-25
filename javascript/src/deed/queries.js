@@ -1,6 +1,5 @@
 YAHOO.cc.deed.DEED_INFO =  {
-    select: [ "work", "attributionName", "attributionURL", "title",
-	      "morePermissions", "commercialLicense", "morePermissionsAgent"
+    select: [ "work", "attributionName", "attributionURL", "title"
 	    ],
     where:
     [
@@ -53,7 +52,22 @@ YAHOO.cc.deed.DEED_INFO =  {
 
 	// optional: Registration
 
-	// optionally look for disease information
-	]
+    ]
+};
+
+YAHOO.cc.deed.CC_PLUS =  {
+    select: [ "work", 
+	      "morePermissions", "commercialLicense", "morePermissionsAgent"
+	    ],
+    where:
+    [
+	{ pattern: [ "?work", 
+		     "http://www.w3.org/1999/xhtml/vocab#license",
+		     document.URL ] },
+
+	{ pattern: [ "?work",
+		     "http://creativecommons.org/ns#morePermissions", 
+		     "?morePermissions" ] }
+    ]
 };
 

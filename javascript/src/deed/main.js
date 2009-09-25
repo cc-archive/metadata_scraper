@@ -6,6 +6,8 @@ YAHOO.cc.deed.parse_success = function(store) {
     var query = new RDFQuery(store);
     var results = query.query2(YAHOO.cc.deed.DEED_INFO);
 
+    console.log(results);
+
     // XXX we need to check and prefer the referrer in the result set.
     query.walk2(results, {
 	    action : function (obj) {
@@ -15,12 +17,15 @@ YAHOO.cc.deed.parse_success = function(store) {
 		YAHOO.cc.attribution.add_copy_paste(obj);
 
 		// CC+
+		YAHOO.cc.plus.insert(obj);
 
 		// Registration (CC Network)
 
-		console.log(obj);
 	    }
     });
+
+    var results = query.query2(YAHOO.cc.deed.CC_PLUS);
+    console.log(results);
 
 } // parse_success
 
