@@ -19,6 +19,18 @@
 ## DEALINGS IN THE SOFTWARE.
 
 from setuptools import setup, find_packages
+import sys
+
+requires = ['setuptools',
+            'rdfadict>=0.7.1',
+            'web.py',
+            'decorator',
+            'WebTest',
+            'nose'
+            ]
+
+if sys.version_info < (2, 6):
+    requires.append('simplejson')
 
 setup(
     name = "cc.deedscraper",
@@ -30,14 +42,7 @@ setup(
 
     # scripts and dependencies
     dependency_links = ['http://download.zope.org/distribution/'],
-    install_requires = ['setuptools',
-                        'rdfadict>=0.7.1',
-                        'simplejson',
-                        'web.py',
-                        'decorator',
-                        'WebTest',
-                        'nose'
-                        ],
+    install_requires = requires,
     extras_require = {
         'fcgi': ['flup'],
         },
