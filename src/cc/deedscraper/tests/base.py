@@ -1,4 +1,4 @@
-## Copyright (c) 2007-2008 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2007-2009 Nathan R. Yergler, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -18,45 +18,28 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-"""Unit tests for the cc.deedscraper application."""
+"""Unit test support for the cc.deedscraper application."""
 
 import os
 import doctest
 import unittest
-import simplejson
 
-import cherrypy
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import webtest
 
 import cc.deedscraper.app
 
-CFGSTR = 'config:'
-_cfgpath = os.path.join(os.getcwd(), 'test.cfg')
-if os.path.exists(_cfgpath):
-    CFGSTR += _cfgpath
-else:
-    CFGSTR += os.path.join(os.getcwd(), '..', 'test.cfg')
+def test_app():
+    """Return an instance of the cc.deedscraper WSGI app wrapped as a
+    WebTest TestApp."""
 
+    return webtest.TestApp(cc.deedscraper.app.application.wsgifunc())
 
-class TestBase(unittest.TestCase):
-    """Base class of test classes for the CC API. Defines test fixture
-       behavior for creating and destroying webtest.TestApp instance of 
-       the WSGI server."""
-
-    def setUp(self):
-        """Test fixture for nosetests:
-           - sets up the WSGI app server
-           - creates test data generator"""
-        cherrypy.config.update({ 'global' : { 'log.screen' : False, } })
-        self.app = webtest.TestApp(CFGSTR)
-
-    def tearDown(self):
-        """Test fixture for nosetests:
-           - tears down the WSGI app server"""
-        # cherrypy.engine.exit()
-
-
-def formatted_response(**kwargs):
+def formatted_scrape_response(**kwargs):
     """Returns a string which contains *at least* the standard fields returned
     by the metadata scraper application, as well as any option **kwargs
     provided."""
@@ -70,10 +53,12 @@ def formatted_response(**kwargs):
               'morePermissionsAgent':'',
               'allowAdvertising':False,
               'commercialLicense':'',
+              '_source':'',
+              '_action':'scrape',
             }
 
     # update the response with any optional values provided
     for k in kwargs:
         result[k] = kwargs[k]
         
-    return "(%s)" % simplejson.dumps(result)
+    return json.dumps(result)
