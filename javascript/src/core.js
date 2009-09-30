@@ -16,7 +16,7 @@ YAHOO.cc.success = function (response) {
     var subject = null;
 
     // see if the referrer has metadata and is licensed under this license
-    if ( (metadata.subjects.indexOf(referer) > -1) &&
+    if ( (YAHOO.cc.index_of(metadata.subjects, referer) > -1) &&
          (YAHOO.cc.get_license(metadata.triples, referer) == license_url) ) {
 
 	subject = referer;

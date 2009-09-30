@@ -58,6 +58,20 @@ function addQSParameter(url, key, value) {
     return url_nohash + hash;
 } // addQSParameter
 
+YAHOO.cc.index_of = function(arr, item) {
+    // return the index of item in arr; use arr.indexOf if available
+
+    if (arr.index_of) {
+	return arr.index_of(item);
+    }
+
+    for (var i=0; i < arr.length; i++) {
+	if (arr[i] == item) return i;
+    }
+
+    return -1;
+
+} // index_of
 
 
 YAHOO.cc.license_uri = function(license_uri) {
