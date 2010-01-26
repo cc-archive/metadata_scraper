@@ -26,7 +26,8 @@ requires = ['setuptools',
             'web.py',
             'decorator',
             'WebTest',
-            'nose'
+            'nose',
+            'cc.i18npkg',
             ]
 
 if sys.version_info < (2, 6):
