@@ -1,0 +1,40 @@
+##############################################################################
+#
+# Copyright (c) 2003-2004 Zope Corporation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+msgid ""
+msgstr ""
+"Project-Id-Version: Development/Unknown\n"
+"POT-Creation-Date: Mon Jan 25 17:40:58 2010\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Zope 3 Developers <zope3-dev@zope.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: zope/app/locales/extract.py\n"
+
+#: cc/deedscraper/deed.py:112
+#. Default: "<strong>Permissions beyond</strong> the scope of this public license are available at ${morePermissionURLs}."
+msgid "deed.popup.morepermissions"
+msgstr ""
+
+#: cc/deedscraper/deed.py:41
+#. Default: "<a href=\"${owner_url}\">${owner_name}</a>has registered <a href=\"${lookup_uri}\">this work</a> at the <nobr><a href=\"${network_url}\">${network_name}</a></nobr>."
+msgid "deed.popup.registration"
+msgstr ""
+
+#: cc/deedscraper/deed.py:86
+#. Default: "You must attribute this work to <a href=\"${attribURL}\">${attribName}</a> (with link)."
+msgid "deep.popup.attribution"
+msgstr ""
+
