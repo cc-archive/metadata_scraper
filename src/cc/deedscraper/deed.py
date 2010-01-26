@@ -1,5 +1,9 @@
-# Minimal Creative Commons license selector module
 import re
+
+from cc.i18npkg import ccorg_i18n_setup
+from zope import component
+from zope.i18n.interfaces import ITranslationDomain
+domain = component.queryUtility(ITranslationDomain, 'cc_org') 
 
 class License(object):
     """ Encapsulates CC License information into a Python object """ 
@@ -71,6 +75,7 @@ class LicenseFactory:
         else:
             raise Exception, "Malformed Creative Commons License URI: <%s>" % uri
 
+# RDF predicate shortcut functions 
 CC = lambda part: "http://creativecommons.org/ns#%s" % part
 SIOC = lambda part: "http://rdfs.org/sioc/ns#%s" % part
 SIOC_SERVICE = lambda part: "http://rdfs.org/sioc/services#%s" % part
@@ -94,7 +99,7 @@ def get_license_uri(subject, metadata):
         return None
 
 
-def attribution_html(subject, license_uri, attribName='', attribURL=''): #triples=None):
+def attribution_html(lang, subject, license_uri, attribName='', attribURL=''): #triples=None):
     """ Form the copy & paste attribution HTML code for the given subject and
     license. """
 
@@ -119,9 +124,9 @@ def attribution_html(subject, license_uri, attribName='', attribURL=''): #triple
 
     if attribURL and attribName:
         # this needs i18n'ing
-        det = 'You must attribute this work to <a href="%s">%s</a> (with link).' % \
-              (attribURL, attribName)
-        attrib['details'] = det
+        details = 'You must attribute this work to <a href="${attribURL}">${attribName}</a> (with link).'
+        attrib['details'] = domain.translate(details, {'attribURL':attribURL, 'attribName':attribName},
+                                             target_language=lang)
         
     return attrib
 
@@ -171,10 +176,11 @@ def get_lookup_uri(network, metadata, work_uri=None):
 
     return None
 
-def registration_html(owner_url, owner_name, network_url, network_name, lookup_uri):
-
-    html = _('<a href="%(owner_url)s">%(owner_name)s</a>has registered <a href="%(lookup_uri)s">this work</a> at the <nobr><a href="%(network_url)s">%(network_name)s</a></nobr>.') % locals()
-    return html
+def registration_html(lang, owner_url, owner_name, network_url, network_name, lookup_uri):
+    
+    registration_notice = '<a href="${owner_url}">${owner_name}</a>has registered <a href="${lookup_uri}">this work</a> at the <nobr><a href="${network_url}">${network_name}</a></nobr>.'
+    
+    return domain.translate(registration_notice, locals(), target_language=lang)
         
 
 def is_registered(subject, license_uri, metadata=None):
@@ -217,11 +223,6 @@ def is_registered(subject, license_uri, metadata=None):
 
     return False
 
-
-
-
-
-
 def attribution(lang, subject, license_uri, metadata=None):
     
     if subject not in metadata['subjects']:
@@ -233,7 +234,7 @@ def attribution(lang, subject, license_uri, metadata=None):
     if attribName == '' and attribURL == '':
         return None
 
-    return attribution_html(subject, license_uri, attribName[0], attribURL[0])
+    return attribution_html(lang, subject, license_uri, attribName[0], attribURL[0])
 
 
 def registration(lang, subject, license_uri, metadata=None):
@@ -253,13 +254,13 @@ def registration(lang, subject, license_uri, metadata=None):
         if lookup_uri is None:
             return ''
         
-        return registration_html(owner, owner_name, network_url,
+        return registration_html(lang, owner, owner_name, network_url,
                                  network_name, lookup_uri)
 
     except KeyError:
         # if any of the attributes aren't included, then return nothing
-        return None
-    
+        return None  
+
 
 if __name__ == '__main__':
 
@@ -289,10 +290,10 @@ if __name__ == '__main__':
     # TODO add rudimentary validation to input so this fails
     cc_by_sa_3 = License('by-sa', '3.0', 'FART')
 
-    attrib1 = attribution_html("http://example.com", cc_by_3.uri, "John Doig")
-    attrib2 = attribution_html("http://example.com", cc_by_3.uri, None, "http://example.com")
-    attrib3 = attribution_html("http://example.com", cc_by_3.uri, "John Doig", "http://doig.me")
-    attrib4 = attribution_html("http://example.com", cc_by_3.uri)
+    attrib1 = attribution_html("en", "http://example.com", cc_by_3.uri, "John Doig")
+    attrib2 = attribution_html("en", "http://example.com", cc_by_3.uri, None, "http://example.com")
+    attrib3 = attribution_html("en", "http://example.com", cc_by_3.uri, "John Doig", "http://doig.me")
+    attrib4 = attribution_html("en", "http://example.com", cc_by_3.uri)
 
     assert attrib1.has_key('marking') and 'cc:attributionName' in attrib1['marking']
     assert attrib2.has_key('marking') and 'cc:attributionURL' in attrib2['marking']
@@ -304,6 +305,6 @@ if __name__ == '__main__':
                              "http://creativecommons.org/licenses/by/3.0/",
                              metadata)
     
-    reg_html = registration(test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
+    reg_html = registration("en", test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
     
     

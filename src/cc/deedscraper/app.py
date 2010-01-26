@@ -27,6 +27,8 @@ import logging
 import urllib2
 
 import web
+import deed
+
 try:
     import json
 except ImportError:
@@ -52,9 +54,7 @@ def LogResult(log, level=logging.INFO):
     def _logging(f, *args, **kw):
         result = f(*args, **kw)
         log.log(level, result)
-
         return result
-
     return decorator(_logging)
 
 class ScrapeRequestHandler(object):
@@ -223,9 +223,6 @@ class Scrape(ScrapeRequestHandler):
         web.header("Content-Type","text/plain")
         return json.dumps(attribution_info)
 
-
-import deed
-
 class Extras(ScrapeRequestHandler):
 
     def GET(self):
@@ -233,17 +230,19 @@ class Extras(ScrapeRequestHandler):
         subject = web.input().get('url','')
         license_uri = web.input().get('license_uri',
                                       web.ctx.env.get('HTTP_REFERER', ''))
-        lang = web.input().get('lang', 'en_US')
-
+       
         if license_uri == '':
             # TODO needs to return a JSON encoded exception
             return 
-        
+
+        # needs to look at referer's html lang attribute
+        lang = web.input().get('lang', 'en_US')
+
         triples = self._triples(subject)
         
         info = {
-            'attribution' : deed.attribution(subject, license_uri, triples),
-            'registration': deed.registration(subject, license_uri, triples),
+            'attribution' : deed.attribution(lang, subject, license_uri, triples),
+            'registration': deed.registration(lang, subject, license_uri, triples),
             #'permissions' : self._permissions(subject, triples),
         }
         
