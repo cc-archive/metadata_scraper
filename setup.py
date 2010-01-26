@@ -28,6 +28,7 @@ requires = ['setuptools',
             'WebTest',
             'nose',
             'cc.i18npkg',
+            'lxml',
             ]
 
 if sys.version_info < (2, 6):
