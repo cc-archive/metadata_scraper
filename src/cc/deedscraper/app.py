@@ -27,7 +27,7 @@ import logging
 import urllib2
 
 import web
-import deed
+from deed import DeedRefererPopup
 
 try:
     import json
@@ -36,6 +36,7 @@ except ImportError:
 
 from decorator import decorator
 from support import LOG
+from i18n_support import *
 
 from rdfadict.sink import DictSetTripleSink
 
@@ -224,26 +225,36 @@ class Scrape(ScrapeRequestHandler):
         return json.dumps(attribution_info)
 
 class Extras(ScrapeRequestHandler):
-
+    
     def GET(self):
-
         subject = web.input().get('url','')
         license_uri = web.input().get('license_uri',
                                       web.ctx.env.get('HTTP_REFERER', ''))
        
-        if license_uri == '':
+        if license_uri == '' or subject == '':
             # TODO needs to return a JSON encoded exception
-            return 
-
-        # needs to look at referer's html lang attribute
-        lang = web.input().get('lang', 'en_US')
+            return json.dumps({'_exception':'A license URI and a subject URI must be provided.'})
 
         triples = self._triples(subject)
+        if '_exception' in triples['subjects']:
+            # should probably report the error but for now...
+            return json.dumps(triples)
+        
+        lang = get_document_locale(license_uri)
+        if lang is None: # didn't find a lang attribute in the root html element
+            lang = web.input().get('lang', 'en')
+
+        # grab the cc_org catalog to get the available languages
+        lang_code = negotiate_locale(lang, lang_codes(ccorg_catalog()))
+        
+        work = DeedRefererPopup(subject=subject,
+                                license_uri=license_uri,
+                                metadata=triples)
         
         info = {
-            'attribution' : deed.attribution(lang, subject, license_uri, triples),
-            'registration': deed.registration(lang, subject, license_uri, triples),
-            #'permissions' : self._permissions(subject, triples),
+            'attribution' : work.attribution(lang_code),
+            'registration': work.registration(lang_code),
+            'more_permissions' : work.more_permissions(lang_code),
         }
         
         web.header("Content-Type","text/plain")

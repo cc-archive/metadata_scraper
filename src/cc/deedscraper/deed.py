@@ -1,310 +1,125 @@
-import re
+# support functions for metadata extraction
+# make this employ __all__
+from metadata import extract_attribution
+from metadata import extract_registration
+from metadata import extract_more_permissions
+from metadata import LicenseFactory
 
-from cc.i18npkg import ccorg_i18n_setup
-from zope import component
-from zope.i18n.interfaces import ITranslationDomain
-domain = component.queryUtility(ITranslationDomain, 'cc_org') 
+from i18n_support import translate, gettext as _
 
-class License(object):
-    """ Encapsulates CC License information into a Python object """ 
-    def __init__(self, code, version, jurisdiction=None):
-        # requires that a code and version be sepcified
-        self._code = code # need to validate these parameters
-        self.version = version # use a settr to validate
-        self._jurisdiction = jurisdiction # optional, None means 'Unported'
+def add_qs_parameter(url, key, value):
+
+    url = urlparse(url)
+    query = parse_qs(url.query)
+    query[key] = [value]
+    query_string = urlencode( dict([ (k,v[0]) for k,v in query.items()]) )
+
+    return urlunparse((url.scheme,
+                       url.netloc,
+                       url.path,
+                       url.params,
+                       query_string,
+                       url.fragment))
+
+class DeedRefererPopup:
+    
+    def __init__(self, subject, license_uri, metadata):
+        self.subject = subject
+        self.license_uri = license_uri
+        self.metadata = metadata
+
+    def registration(self, lang='en'):
+
+        reg_info = extract_registration(self.subject,
+                                        self.license_uri,
+                                        self.metadata)
+        if not reg_info:
+            return None
+
+        reg_notice = _('deed.popup.registration',
+                       default='<a href="${owner_url}">${owner_name}</a>has registered <a href="${lookup_uri}">this work</a> at the <nobr><a href="${network_url}">${network_name}</a></nobr>.',
+                       mapping=reg_info)
         
-    @property
-    def jurisdiction(self):
-        return self._jurisdiction or 'Unported'
+        return translate(reg_notice, target_language=lang)
 
-    @property
-    def code(self):
-        return self._code == 'zero' and 'CC0' or self._code
-    
-    @property
-    def uri(self):
-        uri = ['http://creativecommons.org',
-               self._code == 'zero' and 'publicdomain' or 'licenses',
-               self._code,
-               self.version]
+    def attribution(self, lang='en'):
 
-        if self._jurisdiction:
-            uri.append(self._jurisdiction)
+        attribName, attribURL = extract_attribution(self.subject,
+                                                    self.license_uri,
+                                                    self.metadata)
 
-        return '/'.join(uri) + '/'
-    
-    def __str__(self):
-        return self.uri
-
-class LicenseFactory:
-    """ Factory for abstracting the selection and validation of CC Licenses """
-    
-    @staticmethod
-    def from_uri(uri):
-
-        std_base = 'http://creativecommons.org/licenses/'
-        cc0_base = 'http://creativecommons.org/publicdomain/zero/'
-
-        if 'deed' in uri:
-            uri = uri[:uri.rindex('deed')]
-
-        if uri.startswith(std_base) and uri.endswith('/'):
-            raw_info = uri[len(std_base):]
-            raw_info = raw_info.rstrip('/')
-            info_list = raw_info.split('/')
-
-            if len(info_list) not in (2,3):
-                raise Exception, "Malformed Creative Commons License URI: <%s>" % uri
-
-            retval = dict( code=info_list[0], version=info_list[1] )
-            
-            if len(info_list) > 2:
-                retval['jurisdiction'] = info_list[2]
-
-            return License(**retval)
-
-        elif uri.startswith(cc0_base) and uri.endswith('/'):
-
-            retval = dict(code='zero')
-            retval['version'] = uri[len(cc0_base):].split('/')[0]
-            if retval['version'] is '':
-                raise Exception, "Malformed Creative Commons License URI: <%s>" % uri
-
-            return License(**retval)
-
-        else:
-            raise Exception, "Malformed Creative Commons License URI: <%s>" % uri
-
-# RDF predicate shortcut functions 
-CC = lambda part: "http://creativecommons.org/ns#%s" % part
-SIOC = lambda part: "http://rdfs.org/sioc/ns#%s" % part
-SIOC_SERVICE = lambda part: "http://rdfs.org/sioc/services#%s" % part
-POWDER = lambda part: "http://www.w3.org/2007/05/powder#%s" % part
-DCT = lambda part: "http://purl.org/dc/terms/%s" % part
-XHTML = lambda part: "http://www.w3.org/1999/xhtml/vocab#%s" % part
-
-def get_license_uri(subject, metadata):
-    
-    if subject not in metadata['subjects']:
-        return None
-
-    license = metadata['triples'][subject].get( XHTML('license') ) or \
-              metadata['triples'][subject].get( DCT('license') ) or \
-              metadata['triples'][subject].get( CC('license') ) or \
-              None
-
-    if license:
-        return license[0]
-    else:
-        return None
-
-
-def attribution_html(lang, subject, license_uri, attribName='', attribURL=''): #triples=None):
-    """ Form the copy & paste attribution HTML code for the given subject and
-    license. """
-
-    attribHTML = '<div xmlns:cc="http://creativecommons.org/ns#" about="%s">%%s</div>' % subject
-    if attribURL:
-        marking = '<a rel="cc:attributionURL"%%shref="%s">%%s</a>' % attribURL
-        if attribName:
-            marking = marking % (' property="cc:attributionName" ', attribName,)
-        else:
-            marking = marking % (' ', attribURL,)
-    elif attribName:
-        marking = '<span property="cc:attributionName">%s</span>' % attribName
-    else:
-        marking = '<span>%s</span>' % subject
-
-    l = LicenseFactory.from_uri(license_uri)
-    marking += ' / <a rel="license" href="%s">CC %s %s</a>' % (l,
-                                                               l.code.upper(),
-                                                               l.version)
-
-    attrib = { 'marking' : attribHTML % marking }
-
-    if attribURL and attribName:
-        # this needs i18n'ing
-        details = 'You must attribute this work to <a href="${attribURL}">${attribName}</a> (with link).'
-        attrib['details'] = domain.translate(details, {'attribURL':attribURL, 'attribName':attribName},
-                                             target_language=lang)
         
-    return attrib
-
-
-"""
-Deed work registration detection specific functions
-"""
-
-def match_iriset(metadata, iriset, subject):
-
-    if iriset.has_key(POWDER('includeregex')):
-
-        for regex in iriset[POWDER('includeregex')]:
-            
-            if re.compile(regex).search(subject) is None:
-                # the subject didn't match one of the includeregex's
-                return False
-
-    if iriset.has_key(POWDER('excluderegex')):
-
-        for regex in iriset[POWDER('excluderegex')]:
-            
-            if re.compile(regex).search(subject) is not None:
-                # the subject matched one of the excluderegex's
-                return False
-
-    return True
-
-def get_lookup_uri(network, metadata, work_uri=None):
-
-    cc_protocol_uri = "http://wiki.creativecommons.org/work-lookup"
-
-    if network not in metadata['subjects'] or \
-       not metadata['triples'][network].has_key(SIOC_SERVICE('has_service')):
-        return None
-
-    for service in metadata['triples'][network][SIOC_SERVICE('has_service')]:
         
-        if service in metadata['subjects'] and \
-           metadata['triples'][service].has_key(SIOC_SERVICE('service_protocol')) and \
-           cc_protocol_uri in metadata['triples'][service][SIOC_SERVICE('service_protocol')]:
+        # if neither of the cc attribution predicates were found then there's
+        # nothing to do from here on
+        if not attribName and not attribURL:
+            return None
+        
+        attribHTML = '<div xmlns:cc="http://creativecommons.org/ns#" about="%s">%%s</div>' % self.subject
+        if attribURL:
+            # need to include an anchor tag to the author's url
+            marking = '<a rel="cc:attributionURL" %%shref="%s">%%s</a>' % attribURL
 
-            if work_uri:
-                return service + "?uri=" + work_uri
+            # if an attributionName was specified, then that value should be the
+            # text of the anchor link and also reference that object using rdfa
+            if attribName: 
+                marking = marking % ('property="cc:attributionName" ', attribName,)
             else:
-                return service
+                marking = marking % ('', attribURL,)
+        elif attribName:
+            marking = '<span property="cc:attributionName">%s</span>' % attribName
+        else:
+            marking = '<span>%s</span>' % self.subject
 
-    return None
+        # get a license object that'll parse the uri for the code and version
+        l = LicenseFactory.from_uri(self.license_uri)
+        marking += ' / <a rel="license" href="%s">CC %s %s</a>' % (l,
+                                                                   l.code.upper(),
+                                                                   l.version)
 
-def registration_html(lang, owner_url, owner_name, network_url, network_name, lookup_uri):
-    
-    registration_notice = '<a href="${owner_url}">${owner_name}</a>has registered <a href="${lookup_uri}">this work</a> at the <nobr><a href="${network_url}">${network_name}</a></nobr>.'
-    
-    return domain.translate(registration_notice, locals(), target_language=lang)
+        attrib = { 'marking' : attribHTML % marking }
+
+        if attribURL and attribName:
+
+            details = _('deep.popup.attribution',
+                        default='You must attribute this work to <a href="${attribURL}">${attribName}</a> (with link).',
+                        mapping={'attribURL':attribURL,'attribName':attribName})
+
+            attrib['details'] = translate(details, target_language=lang)
+
+        return attrib
+
+
+    def more_permissions(self, lang='en'):
         
+        (morePermURLs, 
+         commLicense,
+         morePermAgent) = extract_more_permissions(self.subject, self.metadata)
 
-def is_registered(subject, license_uri, metadata=None):
-    """ Checks for work registration assertions """
-
-    # shorthand accessor
-    triples = metadata['triples']
-
-    # first check for a has_owner assertion
-    if subject not in metadata['subjects'] or \
-       not triples[subject].has_key(SIOC('has_owner')):
-        return False
-
-    # an assertion exists
-    owner_url = triples[subject][SIOC('has_owner')][0]
-
-    if owner_url not in metadata['subjects'] or \
-       not triples[owner_url].has_key(SIOC('owner_of')):
-        # nothing to see here folks
-        return False
-
-    if subject in triples[owner_url][SIOC('owner_of')]:
-        # woot, success!
-        return True
-
-    # check to see if the subject matches an iriset
-    for work in triples[owner_url][SIOC('owner_of')]:
-        # filter out subjects that don't share the same license (why?)
-        if get_license_uri(work, metadata) == license_uri and \
-               triples[work].has_key(SIOC('has_parent')):
-
-            parent = triples[work][SIOC('has_parent')][0]
-
-            if triples[parent].has_key(POWDER('iriset')) and \
-                   match_iriset(metadata,
-                                triples[parent][POWDER('iriset')],
-                                subject):
-
-                return True
-
-    return False
-
-def attribution(lang, subject, license_uri, metadata=None):
-    
-    if subject not in metadata['subjects']:
-        return None
-
-    attribName = metadata['triples'][subject].get( CC('attributionName'), '')
-    attribURL = metadata['triples'][subject].get( CC('attributionURL'), '')
-
-    if attribName == '' and attribURL == '':
-        return None
-
-    return attribution_html(lang, subject, license_uri, attribName[0], attribURL[0])
-
-
-def registration(lang, subject, license_uri, metadata=None):
-
-    if not is_registered(subject, license_uri, metadata):
-        return None
-    
-    try:
-        # retrieve the relevant information
-        owner = metadata['triples'][subject][SIOC('has_owner')][0]
-        owner_name = metadata['triples'][owner][SIOC('name')][0]
-        network_url = metadata['triples'][owner][SIOC('member_of')][0]
-        network_name = metadata['triples'][network_url][DCT('title')][0]
-
-        lookup_uri = get_lookup_uri(network_url, metadata, subject)
-
-        if lookup_uri is None:
-            return ''
+        more_perms = ''
         
-        return registration_html(lang, owner, owner_name, network_url,
-                                 network_name, lookup_uri)
+        if morePermURLs:
 
-    except KeyError:
-        # if any of the attributes aren't included, then return nothing
-        return None  
+            links = [] # anchor tags to all of the morePermissionURLs
+            for url in morePermURLs:
+                links.append(
+                    '<strong><a href="%(cc-referer)s">%(hostname)s</a></strong>' % {
+                    'cc-referer': add_qs_parameter(url, 'cc-referer', self.subject),
+                    'hostname': urlparse(url).netloc })
+            
+            more_perms_text = _('deed.popup.morepermissions',
+                                default='<strong>Permissions beyond</strong> the scope of this public license are available at ${morePermissionURLs}.',
+                                mapping={'morePermissionURLs':', '.join(links)})
 
+            more_perms = translate(more_perms_text, target_language=lang)
 
-if __name__ == '__main__':
+        # part of a pilot project... language is in Dutch and shouldnt be
+        # translated for right now
+        if commLicense and morePermAgent:
+            if more_perms: more_perms += '<br />'
+            more_perms += '<strong>Commerciele Rechten</strong>. ' # removed Dutch e char
+            more_perms += 'Licenties voor commercieel gebruik zijn via'
+            more_perms += ' <strong><a href="%s">' % commLicense
+            more_perms += '%s</a></strong> verkrijgbaar.' % morePermAgent
 
-    
-    import simplejson as json
-    import urllib2
-    test_url = 'http://code.creativecommons.org/~john/deed_test.html'
-    metadata = json.loads(urllib2.urlopen('http://creativecommons.org/apps/triples?url='+test_url).read())
-
-    cc_by_3 = LicenseFactory.from_uri('http://creativecommons.org/licenses/by/3.0/us/')
-    cc_zero = LicenseFactory.from_uri('http://creativecommons.org/publicdomain/zero/1.0/')
-    cc_deed = LicenseFactory.from_uri('http://creativecommons.org/licenses/by/2.0/deed.en')
-
-    assert cc_by_3.uri == 'http://creativecommons.org/licenses/by/3.0/us/'
-    assert cc_by_3.code == 'by'
-    assert cc_by_3.version == '3.0'
-    assert cc_by_3.jurisdiction == 'us'
-    assert cc_zero.uri == 'http://creativecommons.org/publicdomain/zero/1.0/'
-    assert cc_zero.code == 'CC0'
-    assert cc_zero.version == '1.0'
-    assert cc_zero.jurisdiction == 'Unported'
-    assert cc_deed.uri == 'http://creativecommons.org/licenses/by/2.0/'
-    assert cc_deed.code == 'by'
-    assert cc_deed.version == '2.0'
-    assert cc_deed.jurisdiction == 'Unported'
-    
-    # TODO add rudimentary validation to input so this fails
-    cc_by_sa_3 = License('by-sa', '3.0', 'FART')
-
-    attrib1 = attribution_html("en", "http://example.com", cc_by_3.uri, "John Doig")
-    attrib2 = attribution_html("en", "http://example.com", cc_by_3.uri, None, "http://example.com")
-    attrib3 = attribution_html("en", "http://example.com", cc_by_3.uri, "John Doig", "http://doig.me")
-    attrib4 = attribution_html("en", "http://example.com", cc_by_3.uri)
-
-    assert attrib1.has_key('marking') and 'cc:attributionName' in attrib1['marking']
-    assert attrib2.has_key('marking') and 'cc:attributionURL' in attrib2['marking']
-    assert attrib3.has_key('details')
-    assert attrib4.has_key('marking') 
-
-    assert is_registered(test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
-    assert not is_registered("http://code.creativecommons.org/~john/attrib_test.html",
-                             "http://creativecommons.org/licenses/by/3.0/",
-                             metadata)
-    
-    reg_html = registration("en", test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
-    
-    
+        return more_perms or None

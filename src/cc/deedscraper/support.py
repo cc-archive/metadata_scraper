@@ -34,3 +34,4 @@ while not os.path.exists(os.path.join(CONF_DIR, 'log.ini')):
 
 logging.config.fileConfig(os.path.join(CONF_DIR, 'log.ini'))
 LOG = logging.getLogger('cc.deedscraper')
+
