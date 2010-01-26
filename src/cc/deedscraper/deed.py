@@ -71,7 +71,6 @@ class LicenseFactory:
         else:
             raise Exception, "Malformed Creative Commons License URI: <%s>" % uri
 
-
 CC = lambda part: "http://creativecommons.org/ns#%s" % part
 SIOC = lambda part: "http://rdfs.org/sioc/ns#%s" % part
 SIOC_SERVICE = lambda part: "http://rdfs.org/sioc/services#%s" % part
@@ -79,14 +78,14 @@ POWDER = lambda part: "http://www.w3.org/2007/05/powder#%s" % part
 DCT = lambda part: "http://purl.org/dc/terms/%s" % part
 XHTML = lambda part: "http://www.w3.org/1999/xhtml/vocab#%s" % part
 
-def get_license_uri(subject, triples):
+def get_license_uri(subject, metadata):
     
-    if subject not in triples['subjects']:
+    if subject not in metadata['subjects']:
         return None
 
-    license = triples['triples'][subject].get( XHTML('license') ) or \
-              triples['triples'][subject].get( DCT('license') ) or \
-              triples['triples'][subject].get( CC('license') ) or \
+    license = metadata['triples'][subject].get( XHTML('license') ) or \
+              metadata['triples'][subject].get( DCT('license') ) or \
+              metadata['triples'][subject].get( CC('license') ) or \
               None
 
     if license:
@@ -125,24 +124,6 @@ def attribution_html(subject, license_uri, attribName='', attribURL=''): #triple
         attrib['details'] = det
         
     return attrib
-
-
-def attribution(subject, license_uri, metadata=None):
-    
-    if subject not in metadata['subjects']:
-        return None
-
-    attribName = metadata['triples'][subject].get( CC('attributionName'), '')
-    attribURL = metadata['triples'][subject].get( CC('attributionURL'), '')
-
-    if attribName == '' and attribURL == '':
-        return None
-
-    # is this neccesary? doesn't `not if '' then its a list` hold true?
-    if isinstance(attribName, list): attribName = attribName[0]
-    if isinstance(attribURL, list): attribURL = attribURL[0]
-
-    return attribution_html(subject, license_uri, attribName, attribURL)
 
 
 """
@@ -190,30 +171,13 @@ def get_lookup_uri(network, metadata, work_uri=None):
 
     return None
 
-def registration_html(subject, metadata):
+def registration_html(owner_url, owner_name, network_url, network_name, lookup_uri):
 
-    try:
-        # retrieve the relevant information
-        owner = metadata['triples'][subject][SIOC('has_owner')][0]
-        owner_name = metadata['triples'][owner][SIOC('name')][0]
-        network_url = metadata['triples'][owner][SIOC('member_of')][0]
-        network_name = metadata['triples'][network_url][DCT('title')][0]
-
-        lookup_uri = get_lookup_uri(network_url, metadata, subject)
-
-        if lookup_uri is None:
-            return ''
-        
-        html = '<a href="%(owner)s">%(owner_name)s</a> has registered <a href="%(lookup_uri)s">this work</a> at the <nobr><a href="%(network_url)s">%(network_name)s</a></nobr>.' % locals()
-
-        return html
-
-    except KeyError:
-        # if any of the attributes aren't included, then return nothing
-        return ''
+    html = _('<a href="%(owner_url)s">%(owner_name)s</a>has registered <a href="%(lookup_uri)s">this work</a> at the <nobr><a href="%(network_url)s">%(network_name)s</a></nobr>.') % locals()
+    return html
         
 
-def registration(subject, license_uri, metadata=None):
+def is_registered(subject, license_uri, metadata=None):
     """ Checks for work registration assertions """
 
     # shorthand accessor
@@ -222,7 +186,7 @@ def registration(subject, license_uri, metadata=None):
     # first check for a has_owner assertion
     if subject not in metadata['subjects'] or \
        not triples[subject].has_key(SIOC('has_owner')):
-        return None
+        return False
 
     # an assertion exists
     owner_url = triples[subject][SIOC('has_owner')][0]
@@ -230,11 +194,11 @@ def registration(subject, license_uri, metadata=None):
     if owner_url not in metadata['subjects'] or \
        not triples[owner_url].has_key(SIOC('owner_of')):
         # nothing to see here folks
-        return None
+        return False
 
     if subject in triples[owner_url][SIOC('owner_of')]:
         # woot, success!
-        return registration_html(subject, metadata)
+        return True
 
     # check to see if the subject matches an iriset
     for work in triples[owner_url][SIOC('owner_of')]:
@@ -249,12 +213,61 @@ def registration(subject, license_uri, metadata=None):
                                 triples[parent][POWDER('iriset')],
                                 subject):
 
-                return registration_html(subject, metadata)
+                return True
 
-    return None
+    return False
 
+
+
+
+
+
+def attribution(lang, subject, license_uri, metadata=None):
+    
+    if subject not in metadata['subjects']:
+        return None
+
+    attribName = metadata['triples'][subject].get( CC('attributionName'), '')
+    attribURL = metadata['triples'][subject].get( CC('attributionURL'), '')
+
+    if attribName == '' and attribURL == '':
+        return None
+
+    return attribution_html(subject, license_uri, attribName[0], attribURL[0])
+
+
+def registration(lang, subject, license_uri, metadata=None):
+
+    if not is_registered(subject, license_uri, metadata):
+        return None
+    
+    try:
+        # retrieve the relevant information
+        owner = metadata['triples'][subject][SIOC('has_owner')][0]
+        owner_name = metadata['triples'][owner][SIOC('name')][0]
+        network_url = metadata['triples'][owner][SIOC('member_of')][0]
+        network_name = metadata['triples'][network_url][DCT('title')][0]
+
+        lookup_uri = get_lookup_uri(network_url, metadata, subject)
+
+        if lookup_uri is None:
+            return ''
+        
+        return registration_html(owner, owner_name, network_url,
+                                 network_name, lookup_uri)
+
+    except KeyError:
+        # if any of the attributes aren't included, then return nothing
+        return None
+    
 
 if __name__ == '__main__':
+
+    
+    import simplejson as json
+    import urllib2
+    test_url = 'http://code.creativecommons.org/~john/deed_test.html'
+    metadata = json.loads(urllib2.urlopen('http://creativecommons.org/apps/triples?url='+test_url).read())
 
     cc_by_3 = LicenseFactory.from_uri('http://creativecommons.org/licenses/by/3.0/us/')
     cc_zero = LicenseFactory.from_uri('http://creativecommons.org/publicdomain/zero/1.0/')
@@ -286,10 +299,11 @@ if __name__ == '__main__':
     assert attrib3.has_key('details')
     assert attrib4.has_key('marking') 
 
-    import simplejson as json
-    import urllib2
-    test_url = 'http://code.creativecommons.org/~john/deed_test.html'
-    metadata = json.loads(urllib2.urlopen('http://creativecommons.org/apps/triples?url='+test_url).read())
-
-    ccn = registration(test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
+    assert is_registered(test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
+    assert not is_registered("http://code.creativecommons.org/~john/attrib_test.html",
+                             "http://creativecommons.org/licenses/by/3.0/",
+                             metadata)
+    
+    reg_html = registration(test_url, "http://creativecommons.org/licenses/by/3.0/", metadata)
+    
     
