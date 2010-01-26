@@ -43,6 +43,7 @@ FOLLOW_PREDICATES = (
      )
 
 urls = (
+    '/deed', 'Extras',
     '/triples', 'Triples',
     '/scrape',  'Scrape',
     )
@@ -65,7 +66,7 @@ class ScrapeRequestHandler(object):
             return sink
 
         parser = rdfadict.RdfaParser() 
-	if subjects is None: subjects = []
+        if subjects is None: subjects = []
 
         try:
             # load the specified URL and parse the RDFa
@@ -96,7 +97,7 @@ class ScrapeRequestHandler(object):
                                                   depth - 1)
 
         except Exception, e:
-	    triples = {'_exception': str(e)}
+            triples = {'_exception': str(e)}
 
         return triples
 
@@ -222,9 +223,38 @@ class Scrape(ScrapeRequestHandler):
         web.header("Content-Type","text/plain")
         return json.dumps(attribution_info)
 
+
+import deed
+
+class Extras(ScrapeRequestHandler):
+
+    def GET(self):
+
+        subject = web.input().get('url','')
+        license_uri = web.input().get('license_uri',
+                                      web.ctx.env.get('HTTP_REFERER', ''))
+        lang = web.input().get('lang', 'en_US')
+
+        if license_uri == '':
+            # TODO needs to return a JSON encoded exception
+            return 
+        
+        triples = self._triples(subject)
+        
+        info = {
+            'attribution' : deed.attribution(subject, license_uri, triples),
+            'registration': deed.registration(subject, license_uri, triples),
+            #'permissions' : self._permissions(subject, triples),
+        }
+        
+        web.header("Content-Type","text/plain")
+        return json.dumps(info)
+    
 application = web.application(urls,
             dict(Triples = Triples,
-                 Scrape = Scrape))
+                 Scrape = Scrape,
+                 Extras = Extras,))
                               
 if __name__ == "__main__": 
     application.run()
+    
