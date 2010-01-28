@@ -77,7 +77,7 @@ class DeedRefererPopup:
                                                                    l.code.upper(),
                                                                    l.version)
 
-        attrib = { 'marking' : attribHTML % marking }
+        attrib = { 'marking' : attribHTML % marking, 'details':None }
 
         if attribURL and attribName:
 
