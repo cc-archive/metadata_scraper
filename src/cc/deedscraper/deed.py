@@ -7,6 +7,13 @@ from metadata import LicenseFactory
 
 from i18n_support import translate, gettext as _
 
+from urllib import urlencode
+from urlparse import urlparse, urlunparse
+try:
+    from urllib import parse_qs
+except:
+    from cgi import parse_qs
+
 def add_qs_parameter(url, key, value):
 
     url = urlparse(url)

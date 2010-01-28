@@ -1,11 +1,5 @@
 import re
 from string import Template
-from urllib import urlencode
-from urlparse import urlparse, urlunparse
-try:
-    from urllib import parse_qs
-except:
-    from cgi import parse_qs
 
 # RDF predicate shortcut functions 
 CC = lambda part: "http://creativecommons.org/ns#%s" % part
