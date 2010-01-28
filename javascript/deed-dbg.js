@@ -42,8 +42,8 @@ YAHOO.cc.attribution.show_info = function(attrib) {
      document.getElementById('work-attribution').value = attrib.marking;
 	 document.getElementById('work-attribution-container').style.display = 'block';
      // check if there are attribution details
-     if ( attrib.details != null ) {
-         document.getElementById('attribution-container').innerHTML = popups.attribution.details;
+    if ( attrib.details != null ) {
+         document.getElementById('attribution-container').innerHTML = attrib.details;
      }
      return;
  }
@@ -61,7 +61,7 @@ YAHOO.cc.network.show_info = function(registration) {
  }
 
 YAHOO.cc.plus.show_info = function (more_permissions) {
-    document.getElementById('more-container').innerHTML = popups.more_permissions;
+    document.getElementById('more-container').innerHTML = more_permissions;
     document.getElementById('more-container').setAttribute("class", "license more");
 }
 
@@ -77,7 +77,7 @@ YAHOO.cc.success = function (response) {
     
     // Check for registration results
     if ( popups.registration != null ) 
-        YAHOO.cc.registration.show_info(popups.registration);
+        YAHOO.cc.network.show_info(popups.registration);
 
     // Check for more permissions
     if ( popups.more_permissions != null ) 
