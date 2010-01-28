@@ -37,7 +37,7 @@ class DeedRefererPopup:
             return None
 
         reg_notice = _('deed.popup.registration',
-                       default='<a href="${owner_url}">${owner_name}</a>has registered <a href="${lookup_uri}">this work</a> at the <nobr><a href="${network_url}">${network_name}</a></nobr>.',
+                       default='<a href="${owner_url}">${owner_name}</a> has registered <a href="${lookup_uri}">this work</a> at the <nobr><a href="${network_url}">${network_name}</a></nobr>.',
                        mapping=reg_info)
         
         return translate(reg_notice, target_language=lang)
