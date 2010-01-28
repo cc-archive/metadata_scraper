@@ -58,20 +58,46 @@ def LogResult(log, level=logging.INFO):
         return result
     return decorator(_logging)
 
+class TripleRedirectHandler(urllib2.HTTPRedirectHandler):
+    def __init__(self, redirects, *args, **kwargs):
+        self.redirects = redirects
+        urllib2.HTTPRedirectHandler(*args, **kwargs)
+    def http_error_301 (self, req, fp, code, msg, headers):
+        self.redirects[headers['Location']] = req.get_full_url()
+        return urllib2.HTTPRedirectHandler.http_error_301(
+            self, req, fp, code, msg, headers)
+    def http_error_302 (self, req, fp, code, msg, headers):
+        self.redirects[headers['Location']] = req.get_full_url()
+        return urllib2.HTTPRedirectHandler.http_error_302(
+            self, req, fp, code, msg, headers)
+
+class TripleDictSink(DictSetTripleSink):
+    def __init__(self, redirects, *args, **kwargs):
+        self.redirects = redirects
+        super(TripleDictSink, self).__init__(*args, **kwargs)
+    def triple(self, s, p, o):
+        super(TripleDictSink, self).triple(s,p,o)
+        if str(s) in self.redirects.keys():
+            super(TripleDictSink, self).triple(self.redirects[str(s)],p,o)
+    
 class ScrapeRequestHandler(object):
 
-    def _load_source(self, url, subjects=None, sink=None, depth=2):
-
+    def _load_source(self, url, subjects=None, sink=None, depth=2, redirects=None):
+        
         # bail out if we've hit the parsing limit
         if depth < 0:
             return sink
-
+        
+        if redirects is None:
+            redirects = {}
+            
         parser = rdfadict.RdfaParser() 
         if subjects is None: subjects = []
 
         try:
+            
             # load the specified URL and parse the RDFa
-            opener = urllib2.build_opener()
+            opener = urllib2.build_opener( TripleRedirectHandler(redirects) )
             request = urllib2.Request(url)
             request.add_header('User-Agent',
                      'CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
@@ -80,7 +106,7 @@ class ScrapeRequestHandler(object):
 
             # default to a set-based triple sink
             if sink is None:
-                sink = DictSetTripleSink()
+                sink = TripleDictSink(redirects)
 
             triples = parser.parse_string(contents, url, sink)
 
@@ -95,7 +121,7 @@ class ScrapeRequestHandler(object):
                             # follow if we haven't already looked here
                             if o not in subjects:
                                 self._load_source(o, subjects, triples,
-                                                  depth - 1)
+                                                  depth - 1, redirects)
 
         except Exception, e:
             triples = {'_exception': str(e)}
@@ -113,6 +139,9 @@ class ScrapeRequestHandler(object):
             referer = web.ctx.environ.get('HTTP_REFERER', '-')
             )
 
+        # track redirects
+        self.r={}
+        
         # parse the RDFa from the document
         triples = self._load_source(url)
 
@@ -225,7 +254,7 @@ class Scrape(ScrapeRequestHandler):
         return json.dumps(attribution_info)
 
 class Extras(ScrapeRequestHandler):
-    
+
     def GET(self):
         subject = web.input().get('url','')
         license_uri = web.input().get('license_uri',
