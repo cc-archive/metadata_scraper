@@ -49,11 +49,11 @@ def negotiate_locale(locale, available, sep='_', aliases=LOCALE_ALIASES):
         return parts[0]
     return None
 
-def get_document_locale(url):
+def get_document_locale(data):
     """ Parses the document residing at the provided url and returns the HTML
     lang attribute value if it exists. """
     try:
-        data = StringIO(urllib2.urlopen(url).read())
+        data = StringIO(data)
         tree = etree.parse(data, etree.HTMLParser())
         return tree.getroot().get('lang', None)
     except:
