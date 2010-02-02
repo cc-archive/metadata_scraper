@@ -27,7 +27,9 @@ import logging
 import urllib2
 
 import web
-from deed import DeedRefererPopup
+web.config.debug = True
+
+from deed import DeedReferer
 
 try:
     import json
@@ -77,6 +79,7 @@ class TripleDictSink(DictSetTripleSink):
         super(TripleDictSink, self).__init__(*args, **kwargs)
     def triple(self, s, p, o):
         super(TripleDictSink, self).triple(s,p,o)
+        # DictSetTripleSink enforces unicode
         if str(s) in self.redirects.keys():
             super(TripleDictSink, self).triple(self.redirects[str(s)],p,o)
     
@@ -256,38 +259,34 @@ class Scrape(ScrapeRequestHandler):
 class Extras(ScrapeRequestHandler):
 
     def GET(self):
-        subject = web.input().get('url','')
+        url = web.input().get('url','')
         license_uri = web.input().get('license_uri',
                                       web.ctx.env.get('HTTP_REFERER', ''))
-       
-        if license_uri == '' or subject == '':
-            # TODO needs to return a JSON encoded exception
+
+        web.header("Content-Type","text/plain")
+        
+        if license_uri == '' or url == '':
             return json.dumps({'_exception':'A license URI and a subject URI must be provided.'})
 
-        triples = self._triples(subject)
+        triples = self._triples(url)
         if '_exception' in triples['subjects']:
             # should probably report the error but for now...
             return json.dumps(triples)
-        
-        lang = get_document_locale(license_uri)
-        if lang is None: # didn't find a lang attribute in the root html element
+
+        license_deed_html = urllib2.urlopen(license_uri).read()
+        lang = get_document_locale( license_deed_html )
+        if lang is None:
+            # didn't find a lang attribute in the root html element
             lang = web.input().get('lang', 'en')
 
         # grab the cc_org catalog to get the available languages
         lang_code = negotiate_locale(lang, lang_codes(ccorg_catalog()))
+       
+        referer = DeedReferer(subject=url,
+                              license_uri=license_uri,
+                              metadata=triples)
         
-        work = DeedRefererPopup(subject=subject,
-                                license_uri=license_uri,
-                                metadata=triples)
-        
-        info = {
-            'attribution' : work.attribution(lang_code),
-            'registration': work.registration(lang_code),
-            'more_permissions' : work.more_permissions(lang_code),
-        }
-        
-        web.header("Content-Type","text/plain")
-        return json.dumps(info)
+        return json.dumps( referer.notices(lang_code) )
     
 application = web.application(urls,
             dict(Triples = Triples,

@@ -107,6 +107,7 @@ class LicenseFactory:
 ##############################################################
 
 def get_license_uri(subject, metadata):
+
     if subject not in metadata['subjects']:
         return None
 
@@ -165,7 +166,7 @@ def get_lookup_uri(network, metadata, work_uri):
     
 def is_registered(subject, license_uri, metadata):
     """ Checks for work registration assertions """
-
+    
     # shorthand accessor
     triples = metadata['triples']
 
@@ -188,7 +189,6 @@ def is_registered(subject, license_uri, metadata):
     if subject in triples[owner_url][SIOC('owner_of')]:
         # woot, success!
         return True
-
     
     # check to see if the subject matches an iriset
     for work in triples[owner_url][SIOC('owner_of')]:
@@ -215,16 +215,32 @@ def is_registered(subject, license_uri, metadata):
 ##                                                          
 ############################################################
 
+def extract_licensed_subject(subject, license_uri, metadata):
+    
+    if get_license_uri(subject, metadata) == license_uri:
+        return subject
+    
+    licensed = filter( lambda s: get_license_uri(s,metadata) == license_uri,
+                       metadata['subjects'] )
+    
+    if len(licensed) == 1:
+        return licensed[0]
+    else:
+        return None
+
 def extract_attribution(subject, license_uri, metadata):
     """ Queries a dictionary of triples for cc:attributionName and
     cc:attributionURL.  The result is returned as a tuple where the first
     element is the attributionName, followed by the attributionURL.  """
-    
+
     if subject not in metadata['subjects']:
         return ('', '')
 
     attribName= metadata['triples'][subject].get( CC('attributionName'), '')
     attribURL = metadata['triples'][subject].get( CC('attributionURL'), '')
+
+    if len(attribName) > 1 or len(attribURL) > 1:
+        return ('', '',) # return an empty tuple
 
     if isinstance(attribName, list): attribName = attribName[0]
     if isinstance(attribURL, list): attribURL = attribURL[0]
@@ -263,22 +279,25 @@ def extract_registration(subject, license_uri, metadata):
 def extract_more_permissions(subject, metadata):
 
     if subject not in metadata['subjects']:
-        return None
+        return ('', '', '')
 
     morePermURLs = metadata['triples'][subject].get( CC('morePermissions'),
-                                                    list())
+                                                    '')
     commLicense = metadata['triples'][subject].get( CC('commercialLicense'),
-                                                    '') 
-    morePermAgent = None
+                                                    '')
+    if isinstance(commLicense, list): commLicense = commLicense[0]
+    
+    morePermAgent = ''
     if commLicense and commLicense in metadata['subjects'] and \
-       metadata['triples'][commLicense].has_key( DC('publisher') ):
+       metadata['triples'][commLicense].has_key( DCT('publisher') ):
         
-        publisher = metadata['triples'][commLicense][ DC('publisher') ]
-        if metadata['triples'][publisher].has_key( DC('title') ):
+        publisher = metadata['triples'][commLicense][ DCT('publisher') ][0]
+        if metadata['triples'][publisher].has_key( DCT('title') ):
             # if there is an available title for the agent,
             # then it'll included in the extra deed permission popup
-            morePermAgent = metadata['triples'][publisher][ DC('title') ][0]
+            morePermAgent = metadata['triples'][publisher][DCT('title')][0]
 
-    # returns a tuple of with (list, string, string) sig
-    return (morePermURLs, commLicense, morePermAgent,)
+    
+    # returns a tuple of with ('' or 1list, string, string) sig
+    return (morePermURLs, commLicense, morePermAgent)
 

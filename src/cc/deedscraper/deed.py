@@ -1,5 +1,6 @@
 # support functions for metadata extraction
 # make this employ __all__
+from metadata import extract_licensed_subject
 from metadata import extract_attribution
 from metadata import extract_registration
 from metadata import extract_more_permissions
@@ -28,14 +29,34 @@ def add_qs_parameter(url, key, value):
                        query_string,
                        url.fragment))
 
-class DeedRefererPopup:
+class DeedReferer:
     
     def __init__(self, subject, license_uri, metadata):
-        self.subject = subject
+        
         self.license_uri = license_uri
         self.metadata = metadata
+        self.subject = subject
 
-    def registration(self, lang='en'):
+    def notices (self, lang='en'):
+
+        deed_notices = dict( attribution=None,
+                             registration=None,
+                             more_permissions=None )
+        
+        self.subject = extract_licensed_subject(self.subject,
+                                                self.license_uri,
+                                                self.metadata)
+        
+        if self.subject is None:
+            return deed_notices
+
+        deed_notices['attribution'] = self.attribution(lang)
+        deed_notices['registration'] = self.registration(lang)
+        deed_notices['more_permissions'] = self.more_permissions(lang)
+
+        return deed_notices
+
+    def registration (self, lang='en'):
 
         reg_info = extract_registration(self.subject,
                                         self.license_uri,
@@ -55,8 +76,6 @@ class DeedRefererPopup:
                                                     self.license_uri,
                                                     self.metadata)
 
-        
-        
         # if neither of the cc attribution predicates were found then there's
         # nothing to do from here on
         if not attribName and not attribURL:
