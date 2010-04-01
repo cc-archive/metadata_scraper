@@ -19,9 +19,3 @@ class BasicApplicationTests(unittest.TestCase):
 
         response = self.app.get('/triples')
         self.assertEqual(response.status, '200 OK')
-
-    def test_scrape_method_exists(self):
-        """/triples returns 200."""
-
-        response = self.app.get('/scrape')
-        self.assertEqual(response.status, '200 OK')

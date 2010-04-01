@@ -20,45 +20,16 @@
 
 """Unit test support for the cc.deedscraper application."""
 
-import os
 import doctest
 import unittest
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 import webtest
 
 import cc.deedscraper.app
+
+FIXTURES_URL = 'http://code.creativecommons.org/tests/metadata_scraper/'
 
 def test_app():
     """Return an instance of the cc.deedscraper WSGI app wrapped as a
     WebTest TestApp."""
 
     return webtest.TestApp(cc.deedscraper.app.application.wsgifunc())
-
-def formatted_scrape_response(**kwargs):
-    """Returns a string which contains *at least* the standard fields returned
-    by the metadata scraper application, as well as any option **kwargs
-    provided."""
-
-    # construct the default (empty) response
-    result = {'licenseUrl':'',
-              'attributionName':'',
-              'attributionUrl':'',
-              'morePermissions':'',
-              'morePermissionsDomain':'',
-              'morePermissionsAgent':'',
-              'allowAdvertising':False,
-              'commercialLicense':'',
-              '_source':'',
-              '_action':'scrape',
-            }
-
-    # update the response with any optional values provided
-    for k in kwargs:
-        result[k] = kwargs[k]
-        
-    return json.dumps(result)

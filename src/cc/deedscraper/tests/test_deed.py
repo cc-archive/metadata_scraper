@@ -5,7 +5,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from cc.deedscraper import metadata, deed
+from cc.deedscraper import metadata
 
 # hmm ideally these should be defined here in the test
 CC = metadata.CC
@@ -14,22 +14,23 @@ SIOC_SERVICE = metadata.SIOC_SERVICE
 DCT = metadata.DCT
 POWDER = metadata.POWDER
 
-class DeedCallTests(unittest.TestCase):
 
-    deed_url = "/deed?license_uri=http://creativecommons.org/licenses/by/3.0/&url=%s"
+DEED_CALL = "/deed?license_uri=http://creativecommons.org/licenses/by/3.0/us/&url=%s"
+
+class DeedCallTests(unittest.TestCase):
 
     def setUp(self):
         self.app = base.test_app()
-
+    
     def test_no_metadata(self):
         """ ensure that a url without any relevant metadata does not
         produce any messages for a deed to include """
 
-        response = self.app.get(self.deed_url % "http://code.creativecommons.org")
+        response = self.app.get(DEED_CALL % "http://code.creativecommons.org")
         data = json.loads(response.body)
-        self.assert_( data['registration'] == None )
-        self.assert_( data['attribution'] == None )
-        self.assert_( data['more_permissions'] == None )
+        self.assert_( data['registration'] == '' )
+        self.assert_( data['attribution'] == {'details':'', 'marking':''} )
+        self.assert_( data['more_permissions'] == '' )
 
     def test_license_referer(self):
 
@@ -54,6 +55,9 @@ class DeedCallTests(unittest.TestCase):
 
 class AttributionMetadataTests (unittest.TestCase):
 
+    def setUp(self):
+        self.app = base.test_app()
+        
     def test_attribution_name_only(self):
         """ Verify that when cc:attributionName is present, attribution language
         is returned to the deed for displaying. """
@@ -63,21 +67,30 @@ class AttributionMetadataTests (unittest.TestCase):
                    'triples': {
                        'http://example.com' : {
                            CC('license') : [
-                               'http://creativecommons.org/licenses/by/3.0/'],
+                               'http://creativecommons.org/licenses/by/3.0/us/'],
                            CC('attributionName'): [
-                               'Testing']
+                               'Example']
                            }
                        }
                    }
 
-        attribName, attribURL = metadata.extract_attribution('http://example.com',
-                                    'http://creativecommons.org/license/by/3.0/',
-                                    triples)
+        attrib = metadata.attribution('http://example.com', triples)
 
-        self.assertEqual(attribName, 'Testing')
-        self.assertEqual(attribURL, '')
+        self.assertEqual(attrib['attributionName'], 'Example')
+        self.assertEqual(attrib['attributionURL'], '')
 
+    def test_attribution_notices_attribution_name_only(self):
+        
+        results = self.app.get(
+            DEED_CALL % ( base.FIXTURES_URL + 'attribution_name_only.html'))
+        results = json.loads(results.body)
 
+        self.assertEqual(
+            results['attribution']['marking'],
+            '<div xmlns:cc="http://creativecommons.org/ns#" about="http://code.creativecommons.org/tests/metadata_scraper/attribution_name_only.html"><span property="cc:attributionName">Example</span> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">CC BY 3.0</a></div>')
+
+        self.assertEqual(results['attribution']['details'], '')
+    
     def test_attribution_url_only(self):
         """ Verify that cc:attributionURL is extracted from a set of triples """
 
@@ -93,113 +106,37 @@ class AttributionMetadataTests (unittest.TestCase):
                        }
                    }
 
-        attribName, attribURL = metadata.extract_attribution('http://example.com',
-                                    'http://creativecommons.org/license/by/3.0/',
-                                    triples)
+        attrib = metadata.attribution('http://example.com', triples)
 
-        self.assertEqual(attribName, '')
-        self.assertEqual(attribURL, 'http://example.com/attribURL')
+        self.assertEqual(attrib['attributionName'], '')
+        self.assertEqual(attrib['attributionURL'], 'http://example.com/attribURL')
 
-        notices = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
+    def test_attribution_marking_atribution_url_only(self):
         
-        self.assertNotEqual(notices['attribution']['marking'], None)
-        self.assertEqual(notices['attribution']['details'], None)
+        results = self.app.get(
+            DEED_CALL % ( base.FIXTURES_URL + 'attribution_url_only.html'))
+        results = json.loads(results.body)
+
+        self.assertEqual(
+            results['attribution']['marking'],
+            '<div xmlns:cc="http://creativecommons.org/ns#" about="http://code.creativecommons.org/tests/metadata_scraper/attribution_url_only.html"><a rel="cc:attributionURL" href="http://example.com">http://example.com</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">CC BY 3.0</a></div>')
+
+        self.assertEqual(results['attribution']['details'], '')
 
     def test_attribution_details (self):
         """ Attribution details provided when attribURL and attribName are
         scraped. """
 
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com' : {
-                           CC('license') : [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionURL'): [
-                               'http://example.com/attribURL'],
-                           CC('attributionName'): ['Test'],
-                           }
-                       }
-                   }
-
-        notices = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
-        self.assertEqual(notices['attribution']['marking'],
-                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com/attribURL">Test</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></div>')
-        self.assertEqual(notices['attribution']['details'],
-                         'You must attribute this work to ' + \
-                         '<a href="http://example.com/attribURL">Test</a> ' + \
-                         '(with link).')
-
-    def test_attribution_marking_attribURL_attribName (self):
-        """ Test the output of the attribution marking html """
-
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com' : {
-                           CC('license') : [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionURL'): [
-                               'http://example.com/attribURL'],
-                           CC('attributionName'): ['Test'],
-                           }
-                       }
-                   }
-
-        notices = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
-        self.assertEqual(notices['attribution']['marking'],
-                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com/attribURL">Test</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></div>')
+        results = self.app.get(
+            DEED_CALL % ( base.FIXTURES_URL + 'attribution.html'))
+        notices = json.loads(results.body)
         
-    def test_attribution_marking_attribURL (self):
-        """ Test the output of the attribution marking html for
-        cc:attributionURL only """
-
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com' : {
-                           CC('license') : [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionURL'): [
-                               'http://example.com/attribURL'],
-                           }
-                       }
-                   }
-
-        notices = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
         self.assertEqual(notices['attribution']['marking'],
-                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><a rel="cc:attributionURL" href="http://example.com/attribURL">http://example.com/attribURL</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></div>')
+                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://code.creativecommons.org/tests/metadata_scraper/attribution.html"><a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com">Example</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">CC BY 3.0</a></div>')
+        self.assertEqual(notices['attribution']['details'],
+                         'You must attribute this work to <a href="http://example.com">Example</a> (with link).')
 
     
-    def test_attribution_marking_attribName (self):
-        """ Test the output of the attribution marking html for
-        cc:attributionName only  """
-
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com' : {
-                           CC('license') : [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionName'): ['Testing'],
-                           }
-                       }
-                   }
-
-        notices = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
-        self.assertEqual(notices['attribution']['marking'],
-                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><span property="cc:attributionName">Testing</span> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></div>')
-
     def test_extract_licensed_subject (self):
         """ Extracting attributionURL and attributionName for a subject that is
         not the referer to the deed. """
@@ -215,20 +152,24 @@ class AttributionMetadataTests (unittest.TestCase):
                        }
                    }
 
-        attribName, attribURL = metadata.extract_attribution('http://example.com',
-                                    'http://creativecommons.org/license/by/3.0/',
-                                    triples)
+        attrib = metadata.attribution('http://example.com', triples)
 
-        self.assertEqual(attribName, 'Testing')
-        self.assertEqual(attribURL, 'http://example.com')
+        self.assertEqual(attrib['attributionName'], 'Testing')
+        self.assertEqual(attrib['attributionURL'], 'http://example.com')
+
+
+    def test_attribution_non_referring_licensed_subject(self):
         
-        notices = deed.DeedReferer('http://example.com/blog/',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples).notices()
+        results = self.app.get(
+            DEED_CALL % ( base.FIXTURES_URL + 'attribution_external.html'))
+        notices = json.loads(results.body)
+        
         self.assertEqual(notices['attribution']['marking'],
-                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com">Testing</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></div>')
-        
+                         '<div xmlns:cc="http://creativecommons.org/ns#" about="http://example.com"><a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com">Example</a> / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">CC BY 3.0</a></div>')
 
+        self.assertEqual(notices['attribution']['details'],
+                         'You must attribute this work to <a href="http://example.com">Example</a> (with link).')
+    
     
     def test_attribution(self):
         """ Verify that all attribution is extracted """
@@ -247,61 +188,26 @@ class AttributionMetadataTests (unittest.TestCase):
                        }
                    }
 
-        attribName, attribURL = metadata.extract_attribution('http://example.com',
-                                    'http://creativecommons.org/license/by/3.0/',
-                                    triples)
+        attrib= metadata.attribution('http://example.com', triples)
 
-        self.assertEqual(attribName, 'Testing')
-        self.assertEqual(attribURL, 'http://example.com/copyright')
+        self.assertEqual(attrib['attributionName'], 'Testing')
+        self.assertEqual(attrib['attributionURL'], 'http://example.com/copyright')
 
     def test_multiple_attributions(self):
         """ If multiple attribution assertions exists, do not return anything """
 
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com': {
-                           CC('license'): [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionName'): [
-                               'Testing', 'Example', ],
-                           CC('attributionURL'): [
-                               'http://testing.com', 'http://example.com']
-                           }
-                       }
-                   }
-
-        referer = deed.DeedReferer('http://example.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples)
-
-        self.assertEqual(referer.notices()['attribution'], None)
-
-    def test_attribution_for_nonreferring_subject(self):
-
-        triples = {'subjects': [
-                       'http://example.com',],
-                   'triples': {
-                       'http://example.com': {
-                           CC('license'): [
-                               'http://creativecommons.org/licenses/by/3.0/'],
-                           CC('attributionName'): [
-                               'Example', ],
-                           CC('attributionURL'): [
-                               'http://example.com', ],
-                           }
-                       },                       
-                   }
-
-        referer = deed.DeedReferer('http://testing.com',
-                                   'http://creativecommons.org/licenses/by/3.0/',
-                                   triples)
-
-        self.assertTrue(referer.notices()['attribution'] != None)
+        results = self.app.get(
+            DEED_CALL % ( base.FIXTURES_URL + 'attribution_multiple.html'))
+        notices = json.loads(results.body)
         
+        self.assertEqual(notices['attribution']['marking'], '')
+        self.assertEqual(notices['attribution']['details'], '')
                            
 class RegistrationTests (unittest.TestCase):
 
+    def setUp(self):
+        self.app = base.test_app()
+        
     def test_no_registration(self):
         """ No registration metadata returns an empty dict """
         triples = {'subjects': [
@@ -315,11 +221,17 @@ class RegistrationTests (unittest.TestCase):
                    }
                    
 
-        reg = metadata.extract_registration("http://example.com",
-                                            "http://creativecommons.org/licenses/by/3.0/",
-                                            triples)
+        reg = metadata.registration("http://example.com",
+                                    triples,
+                                    "http://creativecommons.org/licenses/by/3.0/")
+        empty_reg = {
+            'owner_url': '',
+            'owner_name': '',
+            'network_name': '',
+            'lookup_uri': '',
+            'network_url': ''}
 
-        self.assertEqual( reg, {} )
+        self.assertEqual(reg, empty_reg)
 
     def test_no_reciprocal_registration(self):
         """ has_owner exists, but has no owner_of triple to compelte the
@@ -340,11 +252,18 @@ class RegistrationTests (unittest.TestCase):
                        }
                    }
 
-        reg = metadata.extract_registration("http://example.com",
-                                            "http://creativecommons.org/licenses/by/3.0/",
-                                            triples)
+        reg = metadata.registration("http://example.com",
+                                    triples,
+                                    "http://creativecommons.org/licenses/by/3.0/" )
 
-        self.assertEqual(reg, {})
+        empty_reg = {
+            'owner_url': '',
+            'owner_name': '',
+            'network_name': '',
+            'lookup_uri': '',
+            'network_url': ''}
+
+        self.assertEqual(reg, empty_reg)
 
     def test_incomplete_metadata_registration(self):
         """ ownership assertion exists, but owner name & network info are req. """
@@ -362,11 +281,18 @@ class RegistrationTests (unittest.TestCase):
                        }
                    }
 
-        reg = metadata.extract_registration("http://example.com",
-                                            "http://creativecommons.org/licenses/by/3.0/",
-                                            triples)
+        reg = metadata.registration("http://example.com",
+                                    triples,
+                                    "http://creativecommons.org/licenses/by/3.0/")
 
-        self.assertEqual(reg, {})
+        empty_reg = {
+            'owner_url': '',
+            'owner_name': '',
+            'network_name': '',
+            'lookup_uri': '',
+            'network_url': ''}
+
+        self.assertEqual(reg, empty_reg)
 
     def test_valid_registration(self):
         """ ownership assertion exists, but owner name & network info are req. """
@@ -397,9 +323,9 @@ class RegistrationTests (unittest.TestCase):
                        }
                    }
 
-        reg = metadata.extract_registration("http://example.com",
-                                            "http://creativecommons.org/licenses/by/3.0/",
-                                            triples)
+        reg = metadata.registration("http://example.com",
+                                    triples,
+                                    "http://creativecommons.org/licenses/by/3.0/")
 
         test_registration = {
             'owner_url' : 'http://testing.com',
@@ -588,9 +514,11 @@ class MorePermissionsTest (unittest.TestCase):
                        }
                    }
 
-        self.assertEqual(metadata.extract_more_permissions('http://example.com',
-                                                           triples),
-                         ('', '', '') )
+        mperms = metadata.more_permissions('http://example.com',triples)
+
+        self.assertEqual(mperms['morePermissionsURLs'], '')
+        self.assertEqual(mperms['commercialLicense'], '')
+        self.assertEqual(mperms['morePermAgent'], '')
 
     def test_single_more_permissions_url(self):
         
@@ -604,12 +532,11 @@ class MorePermissionsTest (unittest.TestCase):
                        }
                    }
 
-        urls, commercial_license, agents = \
-              metadata.extract_more_permissions('http://example.com', triples)
+        mperms = metadata.more_permissions('http://example.com', triples)
 
-        self.assertEqual(urls, ['http://testing.com'])
-        self.assertEqual(commercial_license, '')
-        self.assertEqual(agents, '')
+        self.assertEqual(mperms['morePermissionsURLs'], ['http://testing.com'])
+        self.assertEqual(mperms['commercialLicense'], '')
+        self.assertEqual(mperms['morePermAgent'], '')
 
     def test_multiple_more_permissions_url(self):
         
@@ -624,12 +551,12 @@ class MorePermissionsTest (unittest.TestCase):
                        }
                    }
 
-        urls, commercial_license, agents = \
-              metadata.extract_more_permissions('http://example.com', triples)
+        mperms = metadata.more_permissions('http://example.com', triples)
 
-        self.assertEqual(urls, ['http://testing.com', 'http://testing.org'])
-        self.assertEqual(commercial_license, '')
-        self.assertEqual(agents, '')
+        self.assertEqual(mperms['morePermissionsURLs'],
+                         ['http://testing.com', 'http://testing.org'])
+        self.assertEqual(mperms['commercialLicense'], '')
+        self.assertEqual(mperms['morePermAgent'], '')
 
     def test_commercial_license_url(self):
         
@@ -645,13 +572,12 @@ class MorePermissionsTest (unittest.TestCase):
                        }
                    }
 
-        urls, commercial_license, agents = \
-              metadata.extract_more_permissions('http://example.com', triples)
+        mperms = metadata.more_permissions('http://example.com', triples)
 
-        self.assertEqual(urls, ['http://testing.com'])
-        self.assertEqual(commercial_license, 'http://testing.org')
-        self.assertEqual(agents, '')
-
+        self.assertEqual(mperms['morePermissionsURLs'], ['http://testing.com'])
+        self.assertEqual(mperms['commercialLicense'], 'http://testing.org')
+        self.assertEqual(mperms['morePermAgent'], '')
+        
     def test_permission_agents(self):
         
         triples = {'subjects': [
@@ -673,14 +599,11 @@ class MorePermissionsTest (unittest.TestCase):
                           }                           
                        }
                    }
+        
+        mperms = metadata.more_permissions('http://example.com', triples)
 
-        urls, commercial_license, agents = \
-              metadata.extract_more_permissions('http://example.com', triples)
-
-        self.assertEqual(urls, ['http://testing.com'])
-        self.assertEqual(commercial_license, 'http://testing.org')
-        self.assertEqual(agents, 'Testing')
-
-
+        self.assertEqual(mperms['morePermissionsURLs'], ['http://testing.com'])
+        self.assertEqual(mperms['commercialLicense'], 'http://testing.org')
+        self.assertEqual(mperms['morePermAgent'], 'Testing')
 
         
