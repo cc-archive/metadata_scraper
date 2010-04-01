@@ -1,0 +1,5 @@
+{%- if attributionName and attributionURL -%}
+{%- trans attributionName=attributionName, attributionURL -%}
+You must attribute this work to <a href="{{ attributionURL }}">{{ attributionName }}</a> (with link).
+{%- endtrans -%}
+{%- endif -%}

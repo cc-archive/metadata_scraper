@@ -1,0 +1,10 @@
+{%- if morePermissionsURLs -%}
+{%- trans -%}
+<strong>Permissions beyond</strong> the scope of this public license are available at
+{%- endtrans -%}
+{% for url in morePermissionsURLs %} <strong><a href="{{ url|add_qs_parameter('cc-referer', subject) }}">{{ url|hostname }}</a></strong>{% if loop.last %}.{% else %},{% endif %}{%- endfor -%}
+{%- endif -%}
+{%- if commercialLicense and morePermAgent -%}
+{%- if morePermissionsURLs -%}<br />{% endif %}
+<strong>Commerciele Rechten</strong>. Licenties voor commercieel gebruik zijn via <strong><a href="{{ commercialLicense }}">{{ morePermAgent }}</a></strong> verkrijgbaar.
+{%- endif -%}

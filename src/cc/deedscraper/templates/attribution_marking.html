@@ -1,0 +1,10 @@
+{# weird formatting to prevent whitespace in rendering #}
+{%- if attributionName or attributionURL -%}
+<div xmlns:cc="http://creativecommons.org/ns#" about="{{ subject }}">
+{%- if attributionURL -%}  
+    <a rel="cc:attributionURL" {% if attributionName %}property="cc:attributionName" href="{{ attributionURL}}">{{ attributionName }}</a>{% else %}href="{{ attributionURL }}">{{ attributionURL }}</a>{%- endif -%}
+  {%- elif attributionName -%}
+    <span property="cc:attributionName">{{ attributionName }}</span> 
+  {%- else -%}
+    <span>{{ subject }}</span> 
+  {%- endif %} / <a rel="license" href="{{ license }}">CC {{ license.code.upper() }} {{ license.version }}</a></div>{%- endif -%}
