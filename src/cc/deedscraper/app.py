@@ -56,7 +56,7 @@ class Referer(ScrapeRequestHandler):
             return renderer.response(dict(
                 _exception='A license URI and a subject URI must be provided.'))
         
-        triples = self._triples(url)
+        triples = self._triples(url, 'deed')
         if '_exception' in triples['subjects']:
             # should probably report the error but for now...
             return renderer.response(dict(
