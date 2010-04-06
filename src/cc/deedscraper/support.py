@@ -24,6 +24,8 @@ import os
 import logging
 import logging.config
 import urllib2
+import lxml.etree
+from StringIO import StringIO
 from urllib import urlencode
 from urlparse import urlparse, urlunparse
 try:
@@ -45,16 +47,34 @@ LOG = logging.getLogger('cc.deedscraper')
 
 def get_document_locale(url):
     """ Parses the document residing at the provided url and returns the HTML
-    lang attribute value if it exists. """
+    lang attribute value if it exists.
+    >>> get_document_locale('http://staging.creativecommons.org/licenses/by/3.0/deed.fr')
+    'fr'
+    >>> get_document_locale('http://staging.creativecommons.org/licenses/by/3.0/')
+    'en'
+    >>> get_document_locale('http://code.creativecommons.org/tests/metadata_scraper/html_lang.html')
+    'xx'
+    >>> print get_document_locale('http://code.creativecommons.org/tests/metadata_scraper/')
+    None
+    """ 
     try:
-        doc = urllib2.urlopen(url)
+        doc =  urllib2.urlopen(url)
         data = StringIO(doc.read())
-        tree = etree.parse(data, etree.HTMLParser())
+        tree = lxml.etree.parse(data, lxml.etree.HTMLParser())
         return tree.getroot().get('lang', None)
-    except: # catch shit from StringIO, urllib, or lxml 
-        return None
+    except: return None # catch shit from StringIO, urllib, or lxml
 
 def add_qs_parameter(url, key, value):
+    """
+    >>> add_qs_parameter('http://localhost', 'foo', 'bar')
+    'http://localhost?foo=bar'
+    >>> add_qs_parameter('http://localhost/', 'foo', 'bar')
+    'http://localhost/?foo=bar'
+    >>> add_qs_parameter('http://localhost/example', 'foo', 'bar')
+    'http://localhost/example?foo=bar'
+    >>> add_qs_parameter('http://localhost/example?test=example', 'foo', 'bar')
+    'http://localhost/example?test=example&foo=bar'
+    """
 
     url = urlparse(url)
     query = parse_qs(url.query)
@@ -69,4 +89,12 @@ def add_qs_parameter(url, key, value):
                        url.fragment))
 
 def get_hostname(url):
+    """
+    >>> get_hostname('http://cc.org/test/exmaple?foo=bar')
+    'cc.org'
+    >>> get_hostname('http://google.com')
+    'google.com'
+    >>> get_hostname('should return null string')
+    ''
+    """
     return urlparse(url).netloc
