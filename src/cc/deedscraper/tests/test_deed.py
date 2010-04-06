@@ -14,9 +14,8 @@ SIOC_SERVICE = metadata.SIOC_SERVICE
 DCT = metadata.DCT
 POWDER = metadata.POWDER
 
-
-DEED_CALL = "/deed?license_uri=http://creativecommons.org/licenses/by/3.0/us/&url=%s"
-
+REFERER = {'Referer': 'http://creativecommons.org/licenses/by/3.0/us/'}
+        
 class DeedCallTests(unittest.TestCase):
 
     def setUp(self):
@@ -26,7 +25,8 @@ class DeedCallTests(unittest.TestCase):
         """ ensure that a url without any relevant metadata does not
         produce any messages for a deed to include """
 
-        response = self.app.get(DEED_CALL % "http://code.creativecommons.org")
+        response = self.app.get("/deed?url=http://code.creativecommons.org",
+                               headers=REFERER)
         data = json.loads(response.body)
         self.assert_( data['registration'] == '' )
         self.assert_( data['attribution'] == {'details':'', 'marking':''} )
@@ -34,8 +34,7 @@ class DeedCallTests(unittest.TestCase):
 
     def test_license_referer(self):
 
-        h = {'Referer': 'http://creativecommons.org/licenses/by/3.0/us/'}
-        response = self.app.get('/deed?url=http://creativecommons.org', headers=h)
+        response = self.app.get('/deed?url=http://creativecommons.org', headers=REFERER)
         self.assertEqual(response.status, "200 OK")
 
     def test_license_uri_required(self):
@@ -48,10 +47,10 @@ class DeedCallTests(unittest.TestCase):
     def test_url_required(self):
         """ the url of the deed referer must be provided as a qs param. """
 
-        response = self.app.get("/deed?")
+        response = self.app.get("/deed?", headers=REFERER)
         data = json.loads(response.body)
-        self.assertTrue('_exception' in  data)                                
-        
+        self.assertTrue('_exception' in  data)
+            
 
 class AttributionMetadataTests (unittest.TestCase):
 
@@ -82,7 +81,9 @@ class AttributionMetadataTests (unittest.TestCase):
     def test_attribution_notices_attribution_name_only(self):
         
         results = self.app.get(
-            DEED_CALL % ( base.FIXTURES_URL + 'attribution_name_only.html'))
+            '/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution_name_only.html',
+            headers=REFERER)
+        
         results = json.loads(results.body)
 
         self.assertEqual(
@@ -114,7 +115,8 @@ class AttributionMetadataTests (unittest.TestCase):
     def test_attribution_marking_atribution_url_only(self):
         
         results = self.app.get(
-            DEED_CALL % ( base.FIXTURES_URL + 'attribution_url_only.html'))
+            '/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution_url_only.html',
+            headers=REFERER)
         results = json.loads(results.body)
 
         self.assertEqual(
@@ -127,8 +129,9 @@ class AttributionMetadataTests (unittest.TestCase):
         """ Attribution details provided when attribURL and attribName are
         scraped. """
 
-        results = self.app.get(
-            DEED_CALL % ( base.FIXTURES_URL + 'attribution.html'))
+        results = self.app.get('/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution.html',
+                               headers=REFERER)
+        print results.body
         notices = json.loads(results.body)
         
         self.assertEqual(notices['attribution']['marking'],
@@ -160,8 +163,8 @@ class AttributionMetadataTests (unittest.TestCase):
 
     def test_attribution_non_referring_licensed_subject(self):
         
-        results = self.app.get(
-            DEED_CALL % ( base.FIXTURES_URL + 'attribution_external.html'))
+        results = self.app.get('/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution_external.html',
+                               headers=REFERER)
         notices = json.loads(results.body)
         
         self.assertEqual(notices['attribution']['marking'],
@@ -196,12 +199,16 @@ class AttributionMetadataTests (unittest.TestCase):
     def test_multiple_attributions(self):
         """ If multiple attribution assertions exists, do not return anything """
 
-        results = self.app.get(
-            DEED_CALL % ( base.FIXTURES_URL + 'attribution_multiple.html'))
+        results = self.app.get('/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution_multiple.html',
+                               headers=REFERER)
         notices = json.loads(results.body)
         
         self.assertEqual(notices['attribution']['marking'], '')
         self.assertEqual(notices['attribution']['details'], '')
+
+
+
+
                            
 class RegistrationTests (unittest.TestCase):
 
@@ -210,7 +217,9 @@ class RegistrationTests (unittest.TestCase):
         
     def test_no_registration(self):
         """ No registration metadata returns an empty dict """
-        triples = {'subjects': [
+        triples = {
+                   'redirects':{},
+                   'subjects': [
                         'http://example.com',],
                    'triples': {
                        'http://example.com' : {
@@ -237,7 +246,9 @@ class RegistrationTests (unittest.TestCase):
         """ has_owner exists, but has no owner_of triple to compelte the
         assertion """
 
-        triples = {'subjects': [
+        triples = {
+                   'redirects':{},
+                   'subjects': [
                         'http://example.com',
                         'http://testing.com'],
                    'triples': {
@@ -268,7 +279,9 @@ class RegistrationTests (unittest.TestCase):
     def test_incomplete_metadata_registration(self):
         """ ownership assertion exists, but owner name & network info are req. """
 
-        triples = {'subjects': [
+        triples = {
+                   'redirects':{},
+                   'subjects': [
                         'http://example.com',
                         'http://testing.com'],
                    'triples': {
@@ -297,7 +310,9 @@ class RegistrationTests (unittest.TestCase):
     def test_valid_registration(self):
         """ ownership assertion exists, but owner name & network info are req. """
 
-        triples = {'subjects': [
+        triples = {
+                   'redirects':{},
+                   'subjects': [
                         'http://example.com',
                         'http://testing.com',
                         'https://creativecommons.net',
@@ -340,7 +355,9 @@ class RegistrationTests (unittest.TestCase):
     def test_match_with_include_iriset(self):
         """ A succesfull assertion using an iriset """
 
-        triples = {'subjects': ['http://example.com',
+        triples = {
+                   'redirects':{},
+                   'subjects': ['http://example.com',
                                 'http://example.com/foo/1',
                                 'http://example.com/1',
                                 'http://testing.com',
@@ -390,7 +407,9 @@ class RegistrationTests (unittest.TestCase):
         # iri set claims that http://example.com/foo/* is registered except for
         # the document hosted at http://example.com/foo/bar/
         
-        triples = {'subjects': ['http://example.com',
+        triples = {
+                   "redirects":{},
+                   'subjects': ['http://example.com',
                                 'http://example.com/foo/blog/',
                                 'http://example.com/foo/bar/',
                                 'http://testing.com',
@@ -441,6 +460,7 @@ class RegistrationTests (unittest.TestCase):
         """ Ensure that a CC Network registration scenario passes """
 
         triples = {
+            "redirects":{},
             "subjects": [
                 "MnRxHtQa824",
                 "http://staging.creativecommons.net/example",
@@ -496,7 +516,34 @@ class RegistrationTests (unittest.TestCase):
                                                'http://creativecommons.org/licenses/by/3.0/',
                                                triples))
 
+    def test_badge_redirects_registration(self):
+        """ A badge links to an old profile uri
+        (e.g. https://creativecommons.net/example/) causing a redirect to
+        /example then the registration should still be successful """
 
+        test_url = 'http://code.creativecommons.org/tests/metadata_scraper/work_redirect.html'
+        response = self.app.get('/triples?url=' + test_url)
+        triples = json.loads(response.body)
+
+        self.assertTrue(metadata.is_registered(
+            test_url,
+            'http://creativecommons.org/licenses/by/3.0/us/',
+            triples))
+
+    def test_registration_html(self):
+        """ Test that the deed call returns HTML describing a work reg """
+
+        response = self.app.get(
+            '/deed?url=http://code.creativecommons.org/tests/metadata_scraper/work.html',
+            headers=REFERER)
+        notices = json.loads(response.body)
+        print notices
+        self.assertEqual(notices['registration'],
+                         '<a href="http://code.creativecommons.org/tests/metadata_scraper/profile.html">Username</a> has registered <a href="http://code.creativecommons.org/tests/metadata_scraper/lookup.html?uri=http://code.creativecommons.org/tests/metadata_scraper/work.html">this work</a> at the <nobr><a href="">Network</a></nobr>')
+
+        
+        
+        
 class MorePermissionsTest (unittest.TestCase):
 
     def setUp(self):
@@ -607,3 +654,31 @@ class MorePermissionsTest (unittest.TestCase):
         self.assertEqual(mperms['morePermAgent'], 'Testing')
 
         
+    def test_more_permissions_html(self):
+        """ Check the output of the more permissions html notice """
+        response = self.app.get(
+            '/deed?url=http://code.creativecommons.org/tests/metadata_scraper/more_permissions.html',
+            headers=REFERER)
+        notices = json.loads(response.body)
+
+        self.assertEqual(notices['more_permissions'],
+                         '<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href="http://testing.org?cc-referer=http%3A%2F%2Fcode.creativecommons.org%2Ftests%2Fmetadata_scraper%2Fmore_permissions.html">testing.org</a></strong>.')
+                         
+    def test_https_referer(self):
+
+        response = self.app.get(
+            '/deed?url=http://code.creativecommons.org/tests/metadata_scraper/more_permissions.html',
+            headers=REFERER)
+
+        https_response = self.app.get(
+            '/deed?url=https://code.creativecommons.org/tests/metadata_scraper/more_permissions.html',
+            headers=REFERER)
+
+        notices = json.loads(response.body)
+        https_notices = json.loads(https_response.body)
+
+        self.assertEqual(notices['more_permissions'],
+                         '<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href="http://testing.org?cc-referer=http%3A%2F%2Fcode.creativecommons.org%2Ftests%2Fmetadata_scraper%2Fmore_permissions.html">testing.org</a></strong>.')
+
+        self.assertEqual(https_notices['more_permissions'],
+                         '<strong>Permissions beyond</strong> the scope of this public license are available at <strong><a href="http://testing.org?cc-referer=https%3A%2F%2Fcode.creativecommons.org%2Ftests%2Fmetadata_scraper%2Fmore_permissions.html">testing.org</a></strong>.')

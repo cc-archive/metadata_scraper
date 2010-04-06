@@ -22,6 +22,7 @@ class TripleTests(unittest.TestCase):
                               source='',
                               subjects=['_exception'],
                               referer='-',
+                              redirects={},
                               triples={'_exception':'unknown url type: '})
                          )
 
@@ -37,11 +38,48 @@ class TripleTests(unittest.TestCase):
                               source=test_url,
                               subjects=['_exception'],
                               referer='-',
+                              redirects={},
                               triples={"_exception": 
                                        "HTTP Error 404: Not Found"})
                          )
 
 
+    def test_scrape_redirect_301(self):
+        """Attempting to scrape a URL which returns a 301 yields a response
+        dict with values for both subject url's (pre and post redirect) """
+
+        test_url = 'http://code.creativecommons.org/tests/metadata_scraper/'
+        
+        r301_url = 'http://creativecommons.org'
+        
+        response = self.app.get('/triples?url=%s' % ( test_url + '301.html' ))
+
+        triples = json.loads(response.body)
+
+        self.assert_(test_url + '301.html' in triples['subjects'])
+        self.assert_(r301_url in triples['subjects'])
+
+        for predicate,value in triples['triples'][test_url + '301.html'].items():
+            self.assert_( triples['triples'][r301_url][predicate] == value )
+
+    def test_scrape_redirect_302(self):
+        """Attempting to scrape a URL which returns a 302 yields a response
+        dict with values for both subject url's (pre and post redirect) """
+
+        test_url = 'http://code.creativecommons.org/tests/metadata_scraper/'
+        
+        r302_url = 'https://creativecommons.net'
+        
+        response = self.app.get('/triples?url=%s' % ( test_url + '302.html' ))
+
+        triples = json.loads(response.body)
+
+        self.assert_(test_url + '302.html' in triples['subjects'])
+        self.assert_(r302_url in triples['subjects'])
+
+        for predicate,value in triples['triples'][test_url + '302.html'].items():
+            self.assert_( triples['triples'][r302_url][predicate] == value )
+        
     def test_referrer_included(self):
         """If the call has a referrer, it should be included in the 
         response."""
