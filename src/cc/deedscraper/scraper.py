@@ -37,11 +37,11 @@ class TripleRedirectHandler(urllib2.HTTPRedirectHandler):
         self.redirects = redirects
         urllib2.HTTPRedirectHandler(*args, **kwargs)
     def http_error_301 (self, req, fp, code, msg, headers):
-        self.redirects[headers['Location']] = req.get_full_url()
+        self.redirects[req.get_full_url()] = headers['Location']
         return urllib2.HTTPRedirectHandler.http_error_301(
             self, req, fp, code, msg, headers)
     def http_error_302 (self, req, fp, code, msg, headers):
-        self.redirects[headers['Location']] = req.get_full_url()
+        self.redirects[req.get_full_url()] = headers['Location']
         return urllib2.HTTPRedirectHandler.http_error_302(
             self, req, fp, code, msg, headers)
 
@@ -71,13 +71,15 @@ class ScrapeRequestHandler(object):
         if subjects is None: subjects = []
 
         try:
-            
             # load the specified URL and parse the RDFa
             opener = urllib2.build_opener( TripleRedirectHandler(redirects) )
             request = urllib2.Request(url)
             request.add_header('User-Agent','CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
-            contents= opener.open(request).read()
+            response = opener.open(request)
+            contents = response.read()
             subjects.append(url)
+            if response.url != url:
+                subjects.append(response.url)
 
             # default to a set-based triple sink
             if sink is None:
@@ -114,10 +116,10 @@ class ScrapeRequestHandler(object):
             )
 
         # track redirects
-        self.r={}
+        redirects = {}
         
         # parse the RDFa from the document
-        triples = self._load_source(url)
+        triples = self._load_source(url, redirects=redirects)
 
         # post-process the Object sets into lists
         for s in triples.keys():
@@ -145,6 +147,8 @@ class ScrapeRequestHandler(object):
         # add the triples to the result
         result['triples'] = triples
         result['subjects'] = triples.keys()
+        result['redirects'] = redirects
+        
         gc.collect()
         
         return result
