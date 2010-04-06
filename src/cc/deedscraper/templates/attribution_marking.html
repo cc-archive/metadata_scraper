@@ -7,4 +7,4 @@
     <span property="cc:attributionName">{{ attributionName }}</span> 
   {%- else -%}
     <span>{{ subject }}</span> 
-  {%- endif %} / <a rel="license" href="{{ license }}">CC {{ license.code.upper() }} {{ license.version }}</a></div>{%- endif -%}
+  {%- endif %} / <a rel="license" href="{{ license.uri }}">CC {{ license.license_code.upper() }} {{ license.version }}</a></div>{%- endif -%}

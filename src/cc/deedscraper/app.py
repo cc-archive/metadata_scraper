@@ -19,6 +19,7 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import gc
+import cc.license
 
 import web
 import support
@@ -27,7 +28,7 @@ import renderer
 
 from scraper import ScrapeRequestHandler
 
-web.config.debug = True
+web.config.debug = False
 
 urls = (
     '/triples', 'Triples',
@@ -54,7 +55,14 @@ class Referer(ScrapeRequestHandler):
            not license_uri.startswith('http://creativecommons.org/'):
             return renderer.response(dict(
                 _exception='A license URI and a subject URI must be provided.'))
-        
+
+        # get a cc license object
+        # cclicense = metadata.LicenseFactory.from_uri(license_uri)
+        try:
+            cclicense = cc.license.by_uri(str(license_uri))
+        except cc.license.CCLicenseError, e:
+            return renderer.response(dict(_exception=e))
+
         triples = self._triples(url, 'deed')
         if '_exception' in triples['subjects']:
             # should probably report the error but for now...
@@ -66,20 +74,16 @@ class Referer(ScrapeRequestHandler):
         if lang is None:
             # didn't find a lang attribute in the html
             lang = web.input().get('lang', 'en')
-
+        # prepare to render messages for this lang
+        renderer.set_locale(lang)
+        
         subject = metadata.extract_licensed_subject(url, license_uri, triples)
 
         # returns dictionaries with values to cc-relevant triples
         attrib = metadata.attribution(subject, triples)
-        regist = metadata.registration(subject, triples, license_uri)
+        regist = metadata.registration(url, triples, license_uri) 
         mPerms = metadata.more_permissions(subject, triples)
-
-        # get a cc license object
-        cclicense = metadata.LicenseFactory.from_uri(license_uri)
-
-        # prepare to render messages for this lang
-        renderer.set_locale(lang)
-
+        
         results = {
             'attribution': {
                 'details': renderer.render(

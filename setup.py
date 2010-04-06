@@ -29,6 +29,7 @@ requires = ['setuptools',
             'WebTest',
             'nose',
             'cc.i18npkg',
+            'cc.license',
             'lxml',
             ]
 
