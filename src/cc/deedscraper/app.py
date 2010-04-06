@@ -37,7 +37,6 @@ urls = (
 class Triples(ScrapeRequestHandler):
 
     def GET(self):
-        web.header("Content-Type","text/plain")
         triples = self._triples(web.input().get('url',''))
         return renderer.response(triples)
 
