@@ -2,7 +2,7 @@
  * ccdeed.js
  * Core support for license deeds with metadata scraping
  * 
- * copyright 2007-2008, Creative Commons, Nathan R. Yergler
+ * copyright 2007-2008, Creative Commons, Nathan R. Yergler, John E Doig III
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -33,20 +33,8 @@ YAHOO.namespace("cc.attribution");
 // ************************************************************************
 // ************************************************************************
 // ** 
-// **  Parsing/Scraping/Dispatch
+// **  Registration
 // **
-
-
-YAHOO.cc.attribution.show_info = function(attrib) {
-     // display the marking
-     document.getElementById('work-attribution').value = attrib.marking;
-	 document.getElementById('work-attribution-container').style.display = 'block';
-     // check if there are attribution details
-    if ( attrib.details != null ) {
-         document.getElementById('attribution-container').innerHTML = attrib.details;
-     }
-     return;
- }
 
 YAHOO.cc.network.show_info = function(registration) {
      // display the registration information
@@ -60,10 +48,40 @@ YAHOO.cc.network.show_info = function(registration) {
      module.show();
  }
 
+
+// ************************************************************************
+// ************************************************************************
+// ** 
+// **  CC+
+// **
+
 YAHOO.cc.plus.show_info = function (more_permissions) {
     document.getElementById('more-container').innerHTML = more_permissions;
     document.getElementById('more-container').setAttribute("class", "license more");
 }
+// ************************************************************************
+// ************************************************************************
+// ** 
+// **  Attribution
+// **
+
+YAHOO.cc.attribution.show_info = function(attrib) {
+     // display the marking
+     document.getElementById('work-attribution').value = attrib.marking;
+	 document.getElementById('work-attribution-container').style.display = 'block';
+     // check if there are attribution details
+    if ( attrib.details != null ) {
+         document.getElementById('attribution-container').innerHTML = attrib.details;
+     }
+     return;
+ }
+
+
+// ************************************************************************
+// ************************************************************************
+// ** 
+// **  Parsing/Scraping/Dispatch
+// **
 
 YAHOO.cc.success = function (response) {
 
