@@ -1,8 +1,9 @@
 YUI_COMPRESS_JAR = ./lib/yuicompressor-2.4.2.jar
 
-JS_FILES = src/LICENSE src/namespaces.js src/header.js \
+JS_FILES = src/LICENSE src/header.js \
 	src/network.js src/plus.js src/attribution.js \
 	src/core.js
+#   src/namespaces.js \
 #	src/campaign.js \
 
 LD_FILES = src/ubiquity-rdfa/lib/RDFGraph.js \
