@@ -55,12 +55,14 @@ setup(
                          ['server = cc.deedscraper.server:serve',
                           'noop = cc.deedscraper.server:noop',
                           'scraper.fcgi = cc.deedscraper.server:fcgi',
+                          'pybabel = babel.messages.frontend:main',
                           ],
                      'paste.app_factory':
                          ['deedscraper=cc.deedscraper.server:app_factory',
                           ],
+                     
                      },
-
+        
     test_suite = 'nose.collector',
 
     # author metadata
