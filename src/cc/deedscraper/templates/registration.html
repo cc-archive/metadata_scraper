@@ -1,5 +1,5 @@
 {%- if owner_url and owner_name and lookup_uri and network_url and network_name -%}
-{%- trans owner_url=owner_url, owner_name=owner_name, lookup_uri=lookup_uri, network_url=netowrk_url, network_name=network_name -%}
+{%- trans owner_url=owner_url, owner_name=owner_name, lookup_uri=lookup_uri, network_url=network_url, network_name=network_name -%}
 <a href="{{ owner_url }}">{{ owner_name }}</a> has registered <a href="{{ lookup_uri }}">this work</a> at the <nobr><a href="{{ network_url }}">{{ network_name }}</a></nobr>
 {%- endtrans -%}
 {%- endif -%}

@@ -539,7 +539,7 @@ class RegistrationTests (unittest.TestCase):
         notices = json.loads(response.body)
         print notices
         self.assertEqual(notices['registration'],
-                         '<a href="http://code.creativecommons.org/tests/metadata_scraper/profile.html">Username</a> has registered <a href="http://code.creativecommons.org/tests/metadata_scraper/lookup.html?uri=http://code.creativecommons.org/tests/metadata_scraper/work.html">this work</a> at the <nobr><a href="">Network</a></nobr>')
+                         '<a href="http://code.creativecommons.org/tests/metadata_scraper/profile.html">Username</a> has registered <a href="http://code.creativecommons.org/tests/metadata_scraper/lookup.html?uri=http://code.creativecommons.org/tests/metadata_scraper/work.html">this work</a> at the <nobr><a href="http://code.creativecommons.org/tests/metadata_scraper/network.html">Network</a></nobr>')
 
         
         
