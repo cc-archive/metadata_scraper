@@ -35,14 +35,12 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'templates')
 
 __all__ = ['set_locale', 'render', 'response']
 
-def _gettext_for_current_locale(msg):
-    return ugettext_for_locale(LOCALE)(msg)
-
 def set_locale(locale):
+    global LOCALE
     LOCALE = locale
 
 TEMPLATE_GLOBALS = {
-    'gettext' : _gettext_for_current_locale,
+    'gettext' : ugettext_for_locale(LOCALE),
     }
 
 TEMPLATE_FILTERS = {
@@ -50,10 +48,12 @@ TEMPLATE_FILTERS = {
     'add_qs_parameter': add_qs_parameter,
     }
     
-def render(template, context):
+def render(template, context, locale=None):
+    if locale:
+        set_locale(locale)
     jinja = render_jinja(
         TEMPLATE_PATH,
-        globals=TEMPLATE_GLOBALS,
+        globals={'gettext' : ugettext_for_locale(LOCALE)},
         extensions=['jinja2.ext.i18n'],
         encoding='utf-8',
         )
