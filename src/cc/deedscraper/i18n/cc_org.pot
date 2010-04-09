@@ -1,40 +1,40 @@
-##############################################################################
+# Translations template for PROJECT.
+# Copyright (C) 2010 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
 #
-# Copyright (c) 2003-2004 Zope Corporation and Contributors.
-# All Rights Reserved.
-#
-# This software is subject to the provisions of the Zope Public License,
-# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
-#
-##############################################################################
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Development/Unknown\n"
-"POT-Creation-Date: Mon Jan 25 17:40:58 2010\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2010-04-09 15:29-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Zope 3 Developers <zope3-dev@zope.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: zope/app/locales/extract.py\n"
+"Generated-By: Babel 0.9.5\n"
 
-#: cc/deedscraper/deed.py:112
-#. Default: "<strong>Permissions beyond</strong> the scope of this public license are available at ${morePermissionURLs}."
-msgid "deed.popup.morepermissions"
+#: src/cc/deedscraper/templates/attribution_details.html:2
+#, python-format
+msgid ""
+"You must attribute this work to <a "
+"href=\"%(attributionURL)s\">%(attributionName)s</a> (with link)."
 msgstr ""
 
-#: cc/deedscraper/deed.py:41
-#. Default: "<a href=\"${owner_url}\">${owner_name}</a>has registered <a href=\"${lookup_uri}\">this work</a> at the <nobr><a href=\"${network_url}\">${network_name}</a></nobr>."
-msgid "deed.popup.registration"
+#: src/cc/deedscraper/templates/more_permissions.html:2
+msgid ""
+"<strong>Permissions beyond</strong> the scope of this public license are "
+"available at"
 msgstr ""
 
-#: cc/deedscraper/deed.py:86
-#. Default: "You must attribute this work to <a href=\"${attribURL}\">${attribName}</a> (with link)."
-msgid "deep.popup.attribution"
+#: src/cc/deedscraper/templates/registration.html:2
+#, python-format
+msgid ""
+"<a href=\"%(owner_url)s\">%(owner_name)s</a> has registered <a "
+"href=\"%(lookup_uri)s\">this work</a> at the <nobr><a "
+"href=\"%(network_url)s\">%(network_name)s</a></nobr>"
 msgstr ""
 
