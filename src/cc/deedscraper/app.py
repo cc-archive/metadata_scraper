@@ -59,9 +59,13 @@ class Referer(ScrapeRequestHandler):
         # get a cc license object
         # cclicense = metadata.LicenseFactory.from_uri(license_uri)
         try:
-            cclicense = cc.license.by_uri(str(license_uri))
+            if 'deed' in license_uri:
+                stripped_uri = license_uri[:(license_uri.rindex('/')+1)]
+                cclicense = cc.license.by_uri(str(stripped_uri))
+            else:
+                cclicense = cc.license.by_uri(str(license_uri))
         except cc.license.CCLicenseError, e:
-            return renderer.response(dict(_exception=e))
+            return renderer.response(dict(_exception=unicode(e)))
 
         triples = self._triples(url, 'deed')
         if '_exception' in triples['subjects']:
