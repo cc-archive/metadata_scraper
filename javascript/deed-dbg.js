@@ -70,7 +70,7 @@ YAHOO.cc.attribution.show_info = function(attrib) {
      document.getElementById('work-attribution').value = attrib.marking;
 	 document.getElementById('work-attribution-container').style.display = 'block';
      // check if there are attribution details
-    if ( attrib.details != null ) {
+    if ( attrib.details != '' ) {
          document.getElementById('attribution-container').innerHTML = attrib.details;
      }
      return;
@@ -90,15 +90,15 @@ YAHOO.cc.success = function (response) {
     var popups = YAHOO.lang.JSON.parse(response.responseText);
     
     // Check for attribution results
-    if ( popups.attribution != null ) 
+    if ( popups.attribution.details != '' ) 
         YAHOO.cc.attribution.show_info(popups.attribution);
     
     // Check for registration results
-    if ( popups.registration != null ) 
+    if ( popups.registration != '' ) 
         YAHOO.cc.network.show_info(popups.registration);
 
     // Check for more permissions
-    if ( popups.more_permissions != null ) 
+    if ( popups.more_permissions != '' ) 
         YAHOO.cc.plus.show_info(popups.more_permissions);
     
     return;
