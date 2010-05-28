@@ -22,6 +22,10 @@ import gc
 import web
 import urllib2
 import rdfadict
+import logging
+
+from decorator import decorator
+from support import LOG
 
 from rdfadict.sink import DictSetTripleSink
 
@@ -54,6 +58,13 @@ class TripleDictSink(DictSetTripleSink):
         # DictSetTripleSink enforces unicode
         if str(s) in self.redirects.keys():
             super(TripleDictSink, self).triple(self.redirects[str(s)],p,o)
+
+def LogResult(log, level=logging.INFO):
+    def _logging(f, *args, **kw):
+        result = f(*args, **kw)
+        log.log(level, result)
+        return result
+    return decorator(_logging)
 
 class ScrapeRequestHandler(object):
 
@@ -105,7 +116,7 @@ class ScrapeRequestHandler(object):
 
         return triples
 
-        
+    @LogResult(LOG)
     def _triples(self, url, action='triples'):
 
         # initialize the result
