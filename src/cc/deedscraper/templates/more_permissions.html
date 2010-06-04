@@ -2,7 +2,7 @@
 {%- trans -%}
 <strong>Permissions beyond</strong> the scope of this public license are available at
 {%- endtrans -%}
-{% for url in morePermissionsURLs %} <strong><a href="{{ url|add_qs_parameter('cc-referer', subject) }}">{{ url|hostname }}</a></strong>{% if loop.last %}.{% else %},{% endif %}{%- endfor -%}
+{% for url in morePermissionsURLs %} <strong><a href="{{ url|add_qs_parameter('cc-referer', subject) }}">{{ url|get_permissions_link }}</a></strong>{% if loop.last %}.{% else %},{% endif %}{%- endfor -%}
 {%- endif -%}
 {%- if commercialLicense and morePermAgent -%}
 {%- if morePermissionsURLs -%}<br />{% endif %}

@@ -88,13 +88,21 @@ def add_qs_parameter(url, key, value):
                        query_string,
                        url.fragment))
 
-def get_hostname(url):
+def get_permissions_link(url):
     """
-    >>> get_hostname('http://cc.org/test/exmaple?foo=bar')
+    >>> get_permissions_link('http://cc.org/test/exmaple?foo=bar')
     'cc.org'
-    >>> get_hostname('http://google.com')
+    >>> get_permissions_link('http://google.com')
     'google.com'
-    >>> get_hostname('should return null string')
-    ''
+    >>> get_permissions_link('mailto:john@creativecommons.org')
+    'john@creativecommons.org'
+    >>> get_permissions_link('should return null string')
+    'should return null string'
     """
-    return urlparse(url).netloc
+    parsed = urlparse(url)
+    if parsed.scheme in ['http', 'https']:
+        return parsed.netloc
+    elif parsed.scheme in ['mailto']:
+        return parsed.path
+    else:
+        return url

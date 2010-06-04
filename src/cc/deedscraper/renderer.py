@@ -22,7 +22,7 @@ import os
 import web
 
 from web.contrib.template import render_jinja
-from support import get_hostname, add_qs_parameter
+from support import get_permissions_link, add_qs_parameter
 from cc.i18npkg.gettext_i18n import ugettext_for_locale 
 
 try:
@@ -44,7 +44,7 @@ TEMPLATE_GLOBALS = {
     }
 
 TEMPLATE_FILTERS = {
-    'hostname': get_hostname,
+    'get_permissions_link': get_permissions_link,
     'add_qs_parameter': add_qs_parameter,
     }
     
