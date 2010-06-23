@@ -43,6 +43,9 @@ class Triples(ScrapeRequestHandler):
 
 class Referer(ScrapeRequestHandler):
 
+    # maintain a cache of the deeds' lang codes
+    deed_langs = {}
+    
     def GET(self):
 
         # this is required argument
@@ -74,12 +77,16 @@ class Referer(ScrapeRequestHandler):
                 _exception=triples['triples']['_exception']))
 
         # deeds include a lang attribute in <html>
-        lang = support.get_document_locale( license_uri )
-        if lang is None:
-            # didn't find a lang attribute in the html
-            lang = web.input().get('lang', 'en')
+        if license_uri not in self.deed_langs.keys():
+            lang = support.get_document_locale(license_uri)
+            if lang is None:
+                # didn't find a lang attribute in the html
+                lang = web.input().get('lang', 'en')
+            # cache the lang code based on the deed's uri
+            self.deed_langs[license_uri] = lang
+            
         # prepare to render messages for this lang
-        renderer.set_locale(lang)
+        renderer.set_locale(self.deed_langs[license_uri])
         
         subject = metadata.extract_licensed_subject(url, license_uri, triples)
 
