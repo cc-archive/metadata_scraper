@@ -69,8 +69,16 @@ class Referer(ScrapeRequestHandler):
                 cclicense = cc.license.by_uri(str(license_uri))
         except cc.license.CCLicenseError, e:
             return renderer.response(dict(_exception=unicode(e)))
+        
+        triples = self._first_pass(url, 'deed')
+        
+        subject = metadata.extract_licensed_subject(url, license_uri, triples)
 
-        triples = self._triples(url, 'deed')
+        triples = self._triples(url=url, action='deed', depth=1,
+                                sink=triples['sink'],
+                                subjects=triples['subjects'],
+                                redirects=triples['redirects']) 
+        
         if '_exception' in triples['subjects']:
             # should probably report the error but for now...
             return renderer.response(dict(
@@ -87,8 +95,6 @@ class Referer(ScrapeRequestHandler):
             
         # prepare to render messages for this lang
         renderer.set_locale(self.deed_langs[license_uri])
-        
-        subject = metadata.extract_licensed_subject(url, license_uri, triples)
 
         # returns dictionaries with values to cc-relevant triples
         attrib = metadata.attribution(subject, triples)

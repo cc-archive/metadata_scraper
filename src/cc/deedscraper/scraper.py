@@ -24,6 +24,7 @@ import urllib2
 import rdfadict
 import logging
 
+from copy import deepcopy
 from decorator import decorator
 from support import LOG
 
@@ -78,8 +79,10 @@ class ScrapeRequestHandler(object):
         if redirects is None:
             redirects = {}
             
+        if subjects is None:
+            subjects = []
+        
         parser = rdfadict.RdfaParser() 
-        if subjects is None: subjects = []
 
         try:
             # load the specified URL and parse the RDFa
@@ -88,18 +91,17 @@ class ScrapeRequestHandler(object):
             request.add_header('User-Agent','CC Metadata Scaper http://wiki.creativecommons.org/Metadata_Scraper')
             response = opener.open(request)
             contents = response.read()
-            subjects.append(url)
-            if response.url != url:
-                subjects.append(response.url)
-
+            
             # default to a set-based triple sink
             if sink is None:
                 sink = TripleDictSink(redirects)
-
+            
             triples = parser.parse_string(contents, url, sink)
 
             # look for possible predicates to follow
             for s in triples.keys():
+                if s not in subjects:
+                    subjects.append(s)
                 for p in triples[s].keys():
                     if p in FOLLOW_PREDICATES:
 
@@ -116,21 +118,63 @@ class ScrapeRequestHandler(object):
 
         return triples
 
-    @LogResult(LOG)
-    def _triples(self, url, action='triples'):
+    def _first_pass(self, url, action='triples'):
 
+        redirects = {}
+        subjects = []
+        sink = TripleDictSink(redirects)
+
+        triples = self._load_source(url=url, depth=0, sink=sink, 
+                                    redirects=redirects, subjects=subjects)
+
+        # we need to preserve the sink's rdflib types for the follows
+        triples_copy = deepcopy(triples)
+        triples_copy = self._process_triplesink(triples_copy)
+        
+        result = {}
+        result['triples'] = triples_copy
+        result['subjects'] = subjects
+        result['redirects'] = redirects
+        result['sink'] = sink
+
+        return result
+
+    @LogResult(LOG)
+    def _triples(self, url, action='triples', depth=2,
+                 sink=None, subjects=None, redirects=None):
+
+        if subjects is None:
+            subjects = []
+        if redirects is None:
+            redirects = {}
+        
         # initialize the result
         result = dict(
             source = url,
             action = action,
             referer = web.ctx.environ.get('HTTP_REFERER', '-')
             )
-
-        # track redirects
-        redirects = {}
-        
+                
         # parse the RDFa from the document
-        triples = self._load_source(url, redirects=redirects)
+        triples = self._load_source(url,
+                                    depth=depth,
+                                    redirects=redirects,
+                                    sink=sink,
+                                    subjects=subjects,)
+
+        triples = self._process_triplesink(triples)
+        
+        # add the triples to the result
+        result['triples'] = triples
+        result['subjects'] = triples.keys()
+        result['redirects'] = redirects
+        
+        gc.collect()
+        
+        return result
+
+
+    def _process_triplesink(self, triples):
 
         # post-process the Object sets into lists
         for s in triples.keys():
@@ -155,11 +199,4 @@ class ScrapeRequestHandler(object):
                     triples[s][ns_cc + p[len(ns_wr):]] = triples[s][p]
                     del triples[s][p]
                     
-        # add the triples to the result
-        result['triples'] = triples
-        result['subjects'] = triples.keys()
-        result['redirects'] = redirects
-        
-        gc.collect()
-        
-        return result
+        return triples
