@@ -98,7 +98,7 @@ class Referer(ScrapeRequestHandler):
 
         # returns dictionaries with values to cc-relevant triples
         attrib = metadata.attribution(subject, triples)
-        regist = metadata.registration(url, triples, license_uri) 
+        regist = metadata.registration(subject, triples, license_uri) 
         mPerms = metadata.more_permissions(subject, triples)
         
         results = {
