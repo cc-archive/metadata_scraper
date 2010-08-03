@@ -23,7 +23,7 @@ import web
 
 from web.contrib.template import render_jinja
 from support import get_permissions_link, add_qs_parameter
-from cc.i18npkg.gettext_i18n import ugettext_for_locale 
+from cc.i18n.gettext_i18n import ugettext_for_locale 
 
 try:
     import json

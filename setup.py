@@ -28,9 +28,10 @@ requires = ['setuptools',
             'decorator',
             'WebTest',
             'nose',
-            'cc.i18npkg',
+            'cc.i18n',
             'cc.license',
             'lxml',
+            'rdflib<3.0',
             ]
 
 if sys.version_info < (2, 6):
