@@ -11,6 +11,7 @@ from cc.deedscraper import metadata
 CC = metadata.CC
 SIOC = metadata.SIOC
 SIOC_SERVICE = metadata.SIOC_SERVICE
+DC = metadata.DC
 DCT = metadata.DCT
 POWDER = metadata.POWDER
 
@@ -206,10 +207,36 @@ class AttributionMetadataTests (unittest.TestCase):
         self.assertEqual(notices['attribution']['marking'], '')
         self.assertEqual(notices['attribution']['details'], '')
 
+    def test_attribution_title(self):
+        """ Include the dc:title of the work in the attribution information if
+        there exists a triple for the dc:title property """
+        
+        results = self.app.get('/deed?url=http://code.creativecommons.org/tests/metadata_scraper/attribution_title.html',
+                               headers=REFERER)
+        notices = json.loads(results.body)
+        self.assertEqual(notices['attribution']['marking'],
+                         '<div xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" about="http://code.creativecommons.org/tests/metadata_scraper/attribution_title.html"><span property="dc:title">Example Title</span> (<a rel="cc:attributionURL" property="cc:attributionName" href="http://example.com">Example</a>) / <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">CC BY 3.0</a></div>')
+        self.assertEqual(notices['attribution']['details'],
+                         'You must attribute Example Title to <a href="http://example.com">Example</a> (with link).')
 
+    def test_extract_dc_title(self):
+        """ dc:title should be extractable via metadata.get_title
+        if the triple is present """
 
+        triples = {'subjects': [
+                       'http://example.com', ],
+                   'triples': {
+                       'http://example.com' : {
+                           DC('title'): [
+                               'Example Title'],
+                           }
+                       }
+                   }
 
-                           
+        title = metadata.get_title('http://example.com', triples)
+
+        self.assertEqual(title, 'Example Title')
+
 class RegistrationTests (unittest.TestCase):
 
     def setUp(self):

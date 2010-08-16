@@ -1,10 +1,18 @@
 {# weird formatting to prevent whitespace in rendering #}
 {%- if attributionName or attributionURL -%}
-<div xmlns:cc="http://creativecommons.org/ns#" about="{{ subject }}">
-{%- if attributionURL -%}  
-    <a rel="cc:attributionURL" {% if attributionName %}property="cc:attributionName" href="{{ attributionURL}}">{{ attributionName }}</a>{% else %}href="{{ attributionURL }}">{{ attributionURL }}</a>{%- endif -%}
-  {%- elif attributionName -%}
-    <span property="cc:attributionName">{{ attributionName }}</span> 
-  {%- else -%}
+<div xmlns:cc="http://creativecommons.org/ns#" {% if title %}xmlns:dc="http://purl.org/dc/elements/1.1/" {% endif %}about="{{ subject }}">
+{%- if attributionURL and attributionName and title -%}  
+    <span property="dc:title">{{ title }}</span> (<a rel="cc:attributionURL" property="cc:attributionName" href="{{ attributionURL}}">{{ attributionName }}</a>)
+{%- elif attributionURL and attributionName and not title -%}  
+    <a rel="cc:attributionURL" property="cc:attributionName" href="{{ attributionURL}}">{{ attributionName }}</a>
+{%- elif attributionURL and not attributionName -%}
+    <a rel="cc:attributionURL" href="{{ attributionURL}}">{{ '%s' % title if title else attributionURL }}</a>
+{%- elif not attributionURL and attributionName and title -%} 
+    <span property="dc:title">{{ title }}</span> (<span property="cc:attributionName">{{ attributionName }}</span>)
+{%- elif not attributionURL and attributionName and not title -%}
+    <span property="cc:attributionName">{{ attributionName }}</span>
+{%- elif title -%}
+    <span property="dc:title">{{ title }}</span>
+{%- else -%}
     <span>{{ subject }}</span> 
-  {%- endif %} / <a rel="license" href="{{ license.uri }}">CC {{ license.license_code.upper() }} {{ license.version }}</a></div>{%- endif -%}
+{%- endif %} / <a rel="license" href="{{ license.uri }}">CC {{ license.license_code.upper() }} {{ license.version }}</a></div>{%- endif -%}

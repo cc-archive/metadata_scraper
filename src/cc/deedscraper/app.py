@@ -92,7 +92,7 @@ class Referer(ScrapeRequestHandler):
                 lang = web.input().get('lang', 'en')
             # cache the lang code based on the deed's uri
             self.deed_langs[license_uri] = lang
-            
+        
         # prepare to render messages for this lang
         renderer.set_locale(self.deed_langs[license_uri])
 
@@ -100,6 +100,9 @@ class Referer(ScrapeRequestHandler):
         attrib = metadata.attribution(subject, triples)
         regist = metadata.registration(subject, triples, license_uri) 
         mPerms = metadata.more_permissions(subject, triples)
+
+        # check if a dc:title exists
+        title = metadata.get_title(subject, triples)
         
         results = {
             'attribution': {
@@ -107,6 +110,7 @@ class Referer(ScrapeRequestHandler):
                     'attribution_details.html', {
                         'subject': subject,
                         'license': cclicense,
+                        'title': title,
                         'attributionName': attrib['attributionName'],
                         'attributionURL': attrib['attributionURL'],
                         }),
@@ -114,6 +118,7 @@ class Referer(ScrapeRequestHandler):
                     'attribution_marking.html', {
                         'subject': subject,
                         'license': cclicense,
+                        'title': title,
                         'attributionName': attrib['attributionName'],
                         'attributionURL': attrib['attributionURL'],
                         }),

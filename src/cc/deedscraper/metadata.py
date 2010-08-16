@@ -25,6 +25,7 @@ CC = lambda part: "http://creativecommons.org/ns#%s" % part
 SIOC = lambda part: "http://rdfs.org/sioc/ns#%s" % part
 SIOC_SERVICE = lambda part: "http://rdfs.org/sioc/services#%s" % part
 POWDER = lambda part: "http://www.w3.org/2007/05/powder#%s" % part
+DC = lambda part: "http://purl.org/dc/elements/1.1/%s" % part
 DCT = lambda part: "http://purl.org/dc/terms/%s" % part
 XHTML = lambda part: "http://www.w3.org/1999/xhtml/vocab#%s" % part
 
@@ -47,6 +48,16 @@ def get_license_uri(subject, metadata):
 
     if license:
         return license[0]
+    else:
+        return None
+
+def get_title(subject, metadata):
+    """ Returns the dc:title for the subject """
+    if subject not in metadata['subjects']:
+        return None
+    title = metadata['triples'][subject].get( DC('title') ) or None
+    if title:
+        return title[0]
     else:
         return None
     
