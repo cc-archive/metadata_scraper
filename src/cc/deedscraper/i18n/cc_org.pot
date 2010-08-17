@@ -17,7 +17,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.5\n"
 
-#: src/cc/deedscraper/templates/attribution_details.html:2
+#: src/cc/deedscraper/templates/attribution_details.html:3
+#, python-format
+msgid ""
+"You must attribute %(title)s to <a "
+"href=\"%(attributionURL)s\">%(attributionName)s</a> (with link)."
+msgstr ""
+
+#: src/cc/deedscraper/templates/attribution_details.html:7
 #, python-format
 msgid ""
 "You must attribute this work to <a "
