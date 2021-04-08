@@ -1,4 +1,6 @@
-# Deed Metadata Scraper
+*********************
+Deed Metadata Scraper
+*********************
 
 :Date: $LastChangedDate$
 :Version: $LastChangedRevision$
@@ -9,14 +11,16 @@
    licensed to the public under the `MIT license 
    <http://opensource.org/licenses/mit-license.php>`_.
 
-## Overview
+Overview
+########
 
 The deed metadata scraper provides a simple web interface for extracting
 RDFa metadata from a given URL.  The metadata is returned in `JSON 
 <http://json.org>`_ format, which is used by the referrer-metadata.js script
 to update a Creative Commons deed with attribution links.
 
-## Installation
+Installation
+############
 
 The server and dependencies may be deployed using a combination of
 Subversion and `zc.buildout <http://cheeseshop.python.org/pypi/zc.buildout/>`_.
@@ -37,7 +41,8 @@ metadata scaper as an independent server process.
 > downloads.  If it is necessary to move an installation of the
 > software, you *must* run ``buildout`` again.
 
-## Testing
+Testing
+#######
 
 ``cc.deedscraper`` ships with a test runner::
 
@@ -46,7 +51,8 @@ metadata scaper as an independent server process.
 Note that ``./bin/python`` is a script created by zc.buildout which starts a
 Python interpreter with the application dependency eggs on the PYTHONPATH.
 
-## Running the Server
+Running the Server
+##################
 
 cc.deedscraper is a `WSGI <http://wsgi.org/wsgi>`_ application, and can be 
 run in a variety of containers.  The buildout will install and create a 
@@ -71,7 +77,8 @@ An interactive console can be access by running::
 
 Type ``help`` within the console to see a full list of available commands.
 
-## Support
+Support
+#######
 
 Problems? Write to us at hackers@creativecommons.org or send us a pull request...
 
